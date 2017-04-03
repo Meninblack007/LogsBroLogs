@@ -35,7 +35,8 @@ public class LogcatTile extends TileService {
 
 
     public Dialog logDialog() {
-        CharSequence options[] = new CharSequence[]{"Logcat", "Ramoops/Last_kmsg(Whichever applicable)", "Dmesg"};
+        CharSequence options[] = new CharSequence[] {
+                "Logcat", hasRamoops() ? "Ramoops" : "Last_kmsg", "Dmesg"};
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle("Options");
         alertDialog.setItems(options, new DialogInterface.OnClickListener() {
