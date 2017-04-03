@@ -2,6 +2,7 @@ package com.abhi.logsbrologs;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -9,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final String LOG_TAG = "LogsBroLogs";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
             TextView logshow = (TextView)findViewById(R.id.logcat);
             logshow.setText(log.toString());
         } catch (IOException e) {
-            // Handle Exception
+            Log.e(LOG_TAG,e.getMessage());
         }
     }
 
