@@ -10,10 +10,15 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.abhi.logsbrologs.MainActivity">
 
-    <TextView
-        android:text="TextView"
-        android:id="@+id/logcat"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent">
+
+        <TextView
+            android:text="TextView"
+            android:id="@+id/logcat"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+    </ScrollView>
 </RelativeLayout>
