@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
             StringBuilder log=new StringBuilder();
             String line = "";
             while ((line = bufferedReader.readLine()) != null) {
-                log.append(line);
+                log.append(line+"\n");
             }
             TextView logshow = (TextView)findViewById(R.id.logcat);
             logshow.setText(log.toString());
