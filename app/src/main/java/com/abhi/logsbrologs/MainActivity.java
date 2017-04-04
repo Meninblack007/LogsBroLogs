@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private LogsRecyclerAdapter logsRecyclerAdapter;
     private List<LogsModel> list = new ArrayList<>();
-
+   
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,12 +35,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void initViews() {
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        logsRecyclerAdapter = new LogsRecyclerAdapter(getApplicationContext(), list);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(logsRecyclerAdapter);
-    }
+     }
 
 
     @Override
@@ -60,10 +58,12 @@ public class MainActivity extends AppCompatActivity {
                     StringBuilder log = new StringBuilder();
                     log.append(line);
                     appendLineToOutput(line);
-
                 }
             });
         }
+        logsRecyclerAdapter = new LogsRecyclerAdapter(getApplicationContext(), list);
+        recyclerView.setAdapter(logsRecyclerAdapter);
+
     }
 
     private void appendLineToOutput(String line) {
