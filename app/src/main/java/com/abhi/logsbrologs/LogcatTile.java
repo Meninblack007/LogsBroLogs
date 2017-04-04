@@ -43,38 +43,31 @@ public class LogcatTile extends TileService {
         alertDialog.setItems(options, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0:
-                        if(Shell.SU.available()){
+                if(Shell.SU.available()){
+                    switch (which) {
+                        case 0:
                             Shell.SU.run("logcat -d >" + LOG_FILE);
-                            shareIT(LOG_FILE,"Share Logs File");
-                        } else
-                        {
-                            Toast.makeText(LogcatTile.this, "Su permission denied", Toast.LENGTH_SHORT).show();
-                        }
-                        break;
-                    case 1:
-                        if(Shell.SU.available()){
+                            shareIT(LOG_FILE, "Share Logs File");
+                            break;
+                        case 1:
                             if (hasRamoops()) {
                                 Shell.SU.run("cat " + RAMOOPS + " > " + RAM_FILE);
-                                shareIT(RAM_FILE,"Share kernel logs");
+                                shareIT(RAM_FILE, "Share kernel logs");
                             } else {
-                                Shell.SU.run("cat " + LAST_KMSG+ " > " + RAM_FILE);
-                                shareIT(RAM_FILE,"Share kernel logs");
+                                Shell.SU.run("cat " + LAST_KMSG + " > " + RAM_FILE);
+                                shareIT(RAM_FILE, "Share kernel logs");
                             }
-                        } else {
-                            Toast.makeText(LogcatTile.this, "Su permission denied", Toast.LENGTH_SHORT).show();
-                        } break;
-                    case 2:
-                        if(Shell.SU.available()) {
+                            break;
+                        case 2:
                             Shell.SU.run("dmesg >" + DMESG_FILE);
-                            shareIT(DMESG_FILE,"Share dmesg");
+                            shareIT(DMESG_FILE, "Share dmesg");
+                            break;
+                    }
                         } else {
                             Toast.makeText(LogcatTile.this, "Su permission denied", Toast.LENGTH_SHORT).show();
                         }
 
                         }
-            }
         });
         return alertDialog.create();
     }
@@ -85,8 +78,8 @@ public class LogcatTile extends TileService {
     }
 
     public boolean hasRamoops() {
-        String s = Shell.SU.run("[ -f \""+RAMOOPS+"\" ] && echo true || echo false").get(0);
-        return Boolean.parseBoolean(s);
+	String s = Shell.SU.run("[ -f \""+RAMOOPS+"\" ] && echo true || echo false").get(0);
+	return Boolean.parseBoolean(s);
     }
 
     public void shareIT(String e,String f){
