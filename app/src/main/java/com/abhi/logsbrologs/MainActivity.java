@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void logsBro() {
         if (Shell.SU.available()) {
-            rootSession.addCommand(new String[]{"su", "logcat"}, 0, new Shell.OnCommandLineListener() {
+            rootSession.addCommand(new String[]{"logcat"}, 0, new Shell.OnCommandLineListener() {
                 @Override
                 public void onCommandResult(int commandCode, int exitCode) {
                     Log.d(TAG, "onCommandResult: " + commandCode);
