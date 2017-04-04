@@ -52,8 +52,6 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onLine(String line) {
-                    StringBuilder log = new StringBuilder();
-                    log.append(line);
                     appendLineToOutput(line);
                     logsRecyclerAdapter = new LogsRecyclerAdapter(getApplicationContext(), list);
                     if (shouldSetAdapter) {
@@ -64,14 +62,13 @@ public class MainActivity extends AppCompatActivity {
                     recyclerView.scrollToPosition(list.size() - 1);
 
                 }
+
             });
         }
 
     }
 
     private void appendLineToOutput(String line) {
-        StringBuilder sb = (new StringBuilder()).
-                append(line);
-        list.add(new LogsModel(sb.toString() + "\n"));
+        list.add(new LogsModel(line.toString() + "\n"));
     }
 }
