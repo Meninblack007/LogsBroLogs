@@ -1,4 +1,4 @@
-package com.abhi.logsbrologs;
+package com.abhi.logsbrologs.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -6,18 +6,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.abhi.logsbrologs.R;
+
 import java.util.List;
 
 /**
  * Created by men_in_black007 on 3/4/17.
  */
 
-public class LogsRecyclerAdapter extends RecyclerView.Adapter<LogsRecyclerAdapter.MyViewHolder> {
+public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.MyViewHolder> {
 
     private List<LogsModel> logsModelList;
     private Context mContext;
 
-    public LogsRecyclerAdapter(Context context, List<LogsModel> logs) {
+    public LogsAdapter(Context context, List<LogsModel> logs) {
         logsModelList = logs;
         mContext = context;
     }

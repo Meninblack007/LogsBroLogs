@@ -7,6 +7,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
+import com.abhi.logsbrologs.adapter.LogsModel;
+import com.abhi.logsbrologs.adapter.LogsAdapter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "LogsBroLogs";
     private Shell.Interactive rootSession;
     private RecyclerView recyclerView;
-    private LogsRecyclerAdapter logsRecyclerAdapter;
+    private LogsAdapter logsAdapter;
     private List<LogsModel> list = new ArrayList<>();
     boolean shouldSetAdapter = true;
 
@@ -53,10 +56,10 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onLine(String line) {
                     list.add(new LogsModel(line));
-                    logsRecyclerAdapter = new LogsRecyclerAdapter(getApplicationContext(), list);
+                    logsAdapter = new LogsAdapter(getApplicationContext(), list);
                     if (shouldSetAdapter) {
                         shouldSetAdapter = false;
-                        recyclerView.setAdapter(logsRecyclerAdapter);
+                        recyclerView.setAdapter(logsAdapter);
                     }
                     recyclerView.getAdapter().notifyDataSetChanged();
                     recyclerView.scrollToPosition(list.size() - 1);

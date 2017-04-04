@@ -1,4 +1,4 @@
-package com.abhi.logsbrologs;
+package com.abhi.logsbrologs.adapter;
 
 /**
  * Created by men_in_black007 on 3/4/17.
