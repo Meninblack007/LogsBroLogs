@@ -23,7 +23,8 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private LogsRecyclerAdapter logsRecyclerAdapter;
     private List<LogsModel> list = new ArrayList<>();
-   
+    boolean shouldSetAdapter = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,25 +45,31 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        logsBro();
     }
 
     private void logsBro() {
         if (Shell.SU.available()) {
             rootSession.addCommand(new String[] {"su","logcat"}, 0, new Shell.OnCommandLineListener() {
                 @Override
-                public void onCommandResult(int commandCode, int exitCode) {}
+                public void onCommandResult(int commandCode, int exitCode) {
+                    Log.d(TAG, "onCommandResult: " + commandCode);
+                }
 
                 @Override
                 public void onLine(String line) {
                     StringBuilder log = new StringBuilder();
                     log.append(line);
                     appendLineToOutput(line);
+                    logsRecyclerAdapter = new LogsRecyclerAdapter(getApplicationContext(), list);
+                    if(shouldSetAdapter){
+                        shouldSetAdapter = false;
+                        recyclerView.setAdapter(logsRecyclerAdapter);
+                    }
+                    recyclerView.getAdapter().notifyDataSetChanged();
+
                 }
             });
         }
-        logsRecyclerAdapter = new LogsRecyclerAdapter(getApplicationContext(), list);
-        recyclerView.setAdapter(logsRecyclerAdapter);
 
     }
 
