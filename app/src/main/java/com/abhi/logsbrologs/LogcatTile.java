@@ -4,6 +4,8 @@ import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.service.quicksettings.TileService;
@@ -12,7 +14,6 @@ import android.widget.Toast;
 import java.io.File;
 
 import eu.chainfire.libsuperuser.Shell;
-
 @TargetApi(Build.VERSION_CODES.N)
 
 /**
@@ -46,6 +47,7 @@ public class LogcatTile extends TileService {
                     case 0:
                         if(Shell.SU.available()){
                             Shell.SU.run("logcat -d >" + LOG_FILE);
+                            shareIT(LOG_FILE,"Share Logs File");
                         } else
                         {
                             Toast.makeText(LogcatTile.this, "Su permission denied", Toast.LENGTH_SHORT).show();
@@ -55,8 +57,10 @@ public class LogcatTile extends TileService {
                         if(Shell.SU.available()){
                             if (hasRamoops()) {
                                 Shell.SU.run("cat " + RAMOOPS + " > " + RAM_FILE);
+                                shareIT(RAM_FILE,"Share kernel logs");
                             } else {
                                 Shell.SU.run("cat " + LAST_KMSG+ " > " + RAM_FILE);
+                                shareIT(RAM_FILE,"Share kernel logs");
                             }
                         } else {
                             Toast.makeText(LogcatTile.this, "Su permission denied", Toast.LENGTH_SHORT).show();
@@ -64,6 +68,7 @@ public class LogcatTile extends TileService {
                     case 2:
                         if(Shell.SU.available()) {
                             Shell.SU.run("dmesg >" + DMESG_FILE);
+                            shareIT(DMESG_FILE,"Share dmesg");
                         } else {
                             Toast.makeText(LogcatTile.this, "Su permission denied", Toast.LENGTH_SHORT).show();
                         }
@@ -84,4 +89,11 @@ public class LogcatTile extends TileService {
         return Boolean.parseBoolean(s);
     }
 
+    public void shareIT(String e,String f){
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///"+e));
+        shareIntent.setType("text/plain");
+        startActivity(Intent.createChooser(shareIntent, f));
+    }
 }
