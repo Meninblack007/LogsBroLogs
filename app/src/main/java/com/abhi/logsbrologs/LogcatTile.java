@@ -1,8 +1,8 @@
 package com.abhi.logsbrologs;
 
 import android.annotation.TargetApi;
-import android.app.Dialog;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -14,6 +14,7 @@ import android.widget.Toast;
 import java.io.File;
 
 import eu.chainfire.libsuperuser.Shell;
+
 @TargetApi(Build.VERSION_CODES.N)
 
 /**
@@ -24,7 +25,7 @@ public class LogcatTile extends TileService {
 
     public static final String LOG_FILE = new File(Environment.getExternalStorageDirectory(), "Logsbrologs.txt").getAbsolutePath();
     public static final String RAM_FILE = new File(Environment.getExternalStorageDirectory(), "KernelLog.txt").getAbsolutePath();
-    public static final String DMESG_FILE =  new File(Environment.getExternalStorageDirectory().getAbsolutePath())+"/Dmesg.txt";
+    public static final String DMESG_FILE = new File(Environment.getExternalStorageDirectory().getAbsolutePath()) + "/Dmesg.txt";
 
     public static final String RAMOOPS = "/sys/fs/pstore/console-ramoops";
     public static final String LAST_KMSG = "/proc/last_kmsg";
@@ -34,16 +35,15 @@ public class LogcatTile extends TileService {
         super.onStartListening();
     }
 
-
     public Dialog logDialog() {
-        CharSequence options[] = new CharSequence[] {
+        CharSequence options[] = new CharSequence[]{
                 "Logcat", hasRamoops() ? "Ramoops" : "Last_kmsg", "Dmesg"};
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle("Options");
         alertDialog.setItems(options, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(Shell.SU.available()){
+                if (Shell.SU.available()) {
                     switch (which) {
                         case 0:
                             Shell.SU.run("logcat -d >" + LOG_FILE);
@@ -63,14 +63,15 @@ public class LogcatTile extends TileService {
                             shareIT(DMESG_FILE, "Share dmesg");
                             break;
                     }
-                        } else {
-                            Toast.makeText(LogcatTile.this, "Su permission denied", Toast.LENGTH_SHORT).show();
-                        }
+                } else {
+                    Toast.makeText(LogcatTile.this, "Su permission denied", Toast.LENGTH_SHORT).show();
+                }
 
-                        }
+            }
         });
         return alertDialog.create();
     }
+
     @Override
     public void onClick() {
         super.onClick();
@@ -78,14 +79,14 @@ public class LogcatTile extends TileService {
     }
 
     public boolean hasRamoops() {
-	String s = Shell.SU.run("[ -f \""+RAMOOPS+"\" ] && echo true || echo false").get(0);
-	return Boolean.parseBoolean(s);
+        String s = Shell.SU.run("[ -f \"" + RAMOOPS + "\" ] && echo true || echo false").get(0);
+        return Boolean.parseBoolean(s);
     }
 
-    public void shareIT(String e,String f){
+    public void shareIT(String e, String f) {
         Intent shareIntent = new Intent();
         shareIntent.setAction(Intent.ACTION_SEND);
-        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///"+e));
+        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///" + e));
         shareIntent.setType("text/plain");
         startActivity(Intent.createChooser(shareIntent, f));
     }
