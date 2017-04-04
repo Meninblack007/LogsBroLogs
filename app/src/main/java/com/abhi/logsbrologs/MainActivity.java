@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onLine(String line) {
-                    appendLineToOutput(line);
+                    list.add(new LogsModel(line));
                     logsRecyclerAdapter = new LogsRecyclerAdapter(getApplicationContext(), list);
                     if (shouldSetAdapter) {
                         shouldSetAdapter = false;
@@ -60,15 +60,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                     recyclerView.getAdapter().notifyDataSetChanged();
                     recyclerView.scrollToPosition(list.size() - 1);
-
                 }
-
             });
         }
 
-    }
-
-    private void appendLineToOutput(String line) {
-        list.add(new LogsModel(line.toString() + "\n"));
     }
 }
