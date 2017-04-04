@@ -6,15 +6,11 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.chainfire.libsuperuser.*;
+import eu.chainfire.libsuperuser.Shell;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,8 +35,7 @@ public class MainActivity extends AppCompatActivity {
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-     }
-
+    }
 
     @Override
     protected void onResume() {
@@ -49,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void logsBro() {
         if (Shell.SU.available()) {
-            rootSession.addCommand(new String[] {"su","logcat"}, 0, new Shell.OnCommandLineListener() {
+            rootSession.addCommand(new String[]{"su", "logcat"}, 0, new Shell.OnCommandLineListener() {
                 @Override
                 public void onCommandResult(int commandCode, int exitCode) {
                     Log.d(TAG, "onCommandResult: " + commandCode);
@@ -61,11 +56,12 @@ public class MainActivity extends AppCompatActivity {
                     log.append(line);
                     appendLineToOutput(line);
                     logsRecyclerAdapter = new LogsRecyclerAdapter(getApplicationContext(), list);
-                    if(shouldSetAdapter){
+                    if (shouldSetAdapter) {
                         shouldSetAdapter = false;
                         recyclerView.setAdapter(logsRecyclerAdapter);
                     }
                     recyclerView.getAdapter().notifyDataSetChanged();
+                    recyclerView.scrollToPosition(list.size() - 1);
 
                 }
             });
@@ -77,6 +73,5 @@ public class MainActivity extends AppCompatActivity {
         StringBuilder sb = (new StringBuilder()).
                 append(line);
         list.add(new LogsModel(sb.toString() + "\n"));
-
     }
 }
