@@ -9,8 +9,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.abhi.logsbrologs.adapter.LogsModel;
 import com.abhi.logsbrologs.adapter.LogsAdapter;
+import com.abhi.logsbrologs.adapter.LogsModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private LogsAdapter logsAdapter;
     private List<LogsModel> list = new ArrayList<>();
     boolean shouldSetAdapter = true;
-    private int count =0;
+    private int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,28 +66,28 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.verbose:
-                logsBro("logcat");
                 list.clear();
+                logsBro("logcat");
                 break;
             case R.id.debug:
-                logsBro("logcat *:D");
                 list.clear();
+                logsBro("logcat *:D");
                 break;
             case R.id.info:
-                logsBro("logcat *:I");
                 list.clear();
+                logsBro("logcat *:I");
                 break;
             case R.id.warning:
-                logsBro("logcat *:W");
                 list.clear();
+                logsBro("logcat *:W");
                 break;
             case R.id.error:
-                logsBro("logcat *:E");
                 list.clear();
+                logsBro("logcat *:E");
                 break;
             case R.id.fatal:
-                logsBro("logcat *:F");
                 list.clear();
+                logsBro("logcat *:F");
                 break;
             default:
                 logsBro("logcat");
