@@ -30,12 +30,12 @@ public class LogcatActivity extends AppCompatActivity {
     private static final String TAG = "LogcatActivity";
     private Shell.Interactive rootSession;
     private RecyclerView recyclerView;
-    private LogsAdapter logsAdapter;
+    private LogsAdapter logsAdapter, searchAdapter;
     private List<LogsModel> list = new ArrayList<>();
+    private List<LogsModel> searchList = new ArrayList<>();
     private int count = 0;
     private boolean isScrollStateIdle = true;
     private LinearLayoutManager mLayoutManager;
-    public static boolean isSearching = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,9 +72,7 @@ public class LogcatActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                isSearching = true;
-                logsAdapter.filter(query);
-                recyclerView.scrollToPosition(0);
+                filter(query);
                 return true;
             }
 
@@ -174,12 +172,26 @@ public class LogcatActivity extends AppCompatActivity {
                     list.clear();
                 }
                 list.add(new LogsModel(line));
-                if (!isSearching) {
-                    logsAdapter = new LogsAdapter(getApplicationContext(), list);
-                    recyclerView.getAdapter().notifyDataSetChanged();
-                    if (isScrollStateIdle) recyclerView.scrollToPosition(list.size() - 1);
-                }
+                logsAdapter = new LogsAdapter(getApplicationContext(), list);
+                recyclerView.getAdapter().notifyDataSetChanged();
+                if (isScrollStateIdle) recyclerView.scrollToPosition(list.size() - 1);
             }
         });
+    }
+
+    private void filter(String text) {
+        if (text != null && !text.equals("")) {
+            searchList.clear();
+            for (LogsModel item : list) {
+                if (item.getLog().toLowerCase().contains(text))
+                    searchList.add(item);
+            }
+            searchAdapter = new LogsAdapter(getApplicationContext(), searchList);
+            recyclerView.setAdapter(searchAdapter);
+        } else {
+            logsAdapter = new LogsAdapter(getApplicationContext(), list);
+            recyclerView.setAdapter(logsAdapter);
+        }
+        recyclerView.getAdapter().notifyDataSetChanged();
     }
 }

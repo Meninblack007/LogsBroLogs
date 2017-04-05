@@ -18,14 +18,12 @@ import java.util.List;
 
 public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.MyViewHolder> {
 
-    private List<LogsModel> logsModelList, itemsCopy;
+    private List<LogsModel> logsModelList;
     private Context mContext;
 
     public LogsAdapter(Context context, List<LogsModel> logs) {
         logsModelList = logs;
         mContext = context;
-        itemsCopy = new ArrayList<>();
-        itemsCopy.addAll(logsModelList);
     }
 
     @Override
@@ -70,22 +68,6 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.MyViewHolder> 
     @Override
     public int getItemCount() {
         return logsModelList.size();
-    }
-
-    public void filter(String text) {
-        logsModelList.clear();
-        if (text.isEmpty()) {
-            LogcatActivity.isSearching = false;
-            logsModelList.addAll(itemsCopy);
-        } else {
-            text = text.toLowerCase();
-            for (LogsModel item : itemsCopy) {
-                if (item.getLog().toLowerCase().contains(text)) {
-                    logsModelList.add(item);
-                }
-            }
-        }
-        notifyDataSetChanged();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
