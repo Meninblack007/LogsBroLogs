@@ -1,6 +1,9 @@
 package com.abhi.logsbrologs;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,22 +22,23 @@ import eu.chainfire.libsuperuser.Shell;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String TAG = "LogsBroLogs";
+    private static final String TAG = "LogsBroLogs";
+    private static final int CHECKING_SUPER_SU = 0;
+    private static final int SUPER_SU_GRANTED = 1;
     private Shell.Interactive rootSession;
     private RecyclerView recyclerView;
     private LogsAdapter logsAdapter;
     private List<LogsModel> list = new ArrayList<>();
-    boolean shouldSetAdapter = true;
     private int count = 0;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
-        rootSession = new Shell.Builder().useSU().open();
+        Shell.SU.run("");
         initViews();
-        logsBro("logcat");
     }
 
     @Override
@@ -93,40 +97,58 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-
     private void initViews() {
         Log.d(TAG, "initViews");
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        logsAdapter = new LogsAdapter(getApplicationContext(), list);
+        recyclerView.setAdapter(logsAdapter);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Checking for SU");
+        progressDialog.show();
+        handler.sendEmptyMessage(CHECKING_SUPER_SU);
     }
 
-    private void logsBro(String logLevel) {
-        Log.d(TAG, "loglevel: " + logLevel);
-        if (Shell.SU.available()) {
-            rootSession.addCommand(new String[]{logLevel}, 0, new Shell.OnCommandLineListener() {
-                @Override
-                public void onCommandResult(int commandCode, int exitCode) {
-                    Log.d(TAG, "onCommandResult: " + commandCode);
-                }
-
-                @Override
-                public void onLine(String line) {
-                    if (count++ > 10000) {
-                        list.clear();
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case CHECKING_SUPER_SU:
+                    if (Shell.SU.available()) {
+                        handler.sendEmptyMessage(SUPER_SU_GRANTED);
+                    } else {
+                        handler.sendEmptyMessageDelayed(0, 250);
                     }
-                    list.add(new LogsModel(line));
-                    logsAdapter = new LogsAdapter(getApplicationContext(), list);
-                    if (shouldSetAdapter) {
-                        shouldSetAdapter = false;
-                        recyclerView.setAdapter(logsAdapter);
-                    }
-                    recyclerView.getAdapter().notifyDataSetChanged();
-                    recyclerView.scrollToPosition(list.size() - 1);
-                }
-            });
+                    break;
+                case SUPER_SU_GRANTED:
+                    rootSession = new Shell.Builder().useSU().open();
+                    progressDialog.cancel();
+                    logsBro("logcat");
+                    break;
+            }
         }
+    };
 
+    private void logsBro(String logLevel) {
+        Log.d(TAG, "logLevel: " + logLevel);
+        rootSession.addCommand(new String[]{logLevel}, 0, new Shell.OnCommandLineListener() {
+            @Override
+            public void onCommandResult(int commandCode, int exitCode) {
+                Log.d(TAG, "onCommandResult: " + commandCode);
+            }
+
+            @Override
+            public void onLine(String line) {
+                if (count++ > 10000) {
+                    list.clear();
+                }
+                list.add(new LogsModel(line));
+                recyclerView.getAdapter().notifyDataSetChanged();
+                recyclerView.scrollToPosition(list.size() - 1);
+            }
+        });
     }
 }
