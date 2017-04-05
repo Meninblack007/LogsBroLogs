@@ -18,13 +18,13 @@ import java.util.List;
 
 public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.MyViewHolder> {
 
-    private List<LogsModel> logsModelList,itemsCopy;
+    private List<LogsModel> logsModelList;
     private Context mContext;
 
     public LogsAdapter(Context context, List<LogsModel> logs) {
         logsModelList = logs;
         mContext = context;
-        this.itemsCopy=new ArrayList<>();
+        //this.itemsCopy=new ArrayList<>();
         this.itemsCopy.addAll(this.logsModelList);
     }
 
@@ -42,7 +42,7 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.MyViewHolder> 
 
 
     public void filter(String text) {
-        logsModelList.clear();
+    //    logsModelList.clear();
         if(text.isEmpty()){
             MainActivity.isSearching = false;
             logsModelList.addAll(itemsCopy);
