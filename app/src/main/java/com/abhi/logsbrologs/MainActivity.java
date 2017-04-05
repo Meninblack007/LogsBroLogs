@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private int count = 0;
     private ProgressDialog progressDialog;
     private boolean isScrollStateIdle = true;
-    private FloatingActionButton floatingActionButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        list.clear();
         Log.d(TAG, "onStop");
     }
 
@@ -104,16 +102,16 @@ public class MainActivity extends AppCompatActivity {
     private void initViews() {
         Log.d(TAG, "initViews");
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        final LinearLayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         logsAdapter = new LogsAdapter(getApplicationContext(), list);
         recyclerView.setAdapter(logsAdapter);
-        floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Checking for SU");
         progressDialog.show();
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -125,12 +123,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-            }
-        });
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isScrollStateIdle = true;
+                int visibleItemCount = mLayoutManager.getChildCount();
+                int totalItemCount = mLayoutManager.getItemCount();
+                int pastVisibleItems = mLayoutManager.findFirstVisibleItemPosition();
+                if (pastVisibleItems + visibleItemCount >= totalItemCount) {
+                    isScrollStateIdle = true;
+                }
             }
         });
         handler.sendEmptyMessage(CHECKING_SUPER_SU);
