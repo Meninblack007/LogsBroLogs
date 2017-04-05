@@ -89,9 +89,6 @@ public class MainActivity extends AppCompatActivity {
                 list.clear();
                 logsBro("logcat *:F");
                 break;
-            default:
-                logsBro("logcat");
-                break;
         }
         return true;
     }
