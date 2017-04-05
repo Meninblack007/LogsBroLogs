@@ -75,27 +75,27 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.verbose:
                 list.clear();
-                logsBro("logcat");
+                rootSession("logcat");
                 break;
             case R.id.debug:
                 list.clear();
-                logsBro("logcat *:D");
+                rootSession("logcat *:D");
                 break;
             case R.id.info:
                 list.clear();
-                logsBro("logcat *:I");
+                rootSession("logcat *:I");
                 break;
             case R.id.warning:
                 list.clear();
-                logsBro("logcat *:W");
+                rootSession("logcat *:W");
                 break;
             case R.id.error:
                 list.clear();
-                logsBro("logcat *:E");
+                rootSession("logcat *:E");
                 break;
             case R.id.fatal:
                 list.clear();
-                logsBro("logcat *:F");
+                rootSession("logcat *:F");
                 break;
         }
         return true;
@@ -149,13 +149,22 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case SUPER_SU_GRANTED:
-                    rootSession = new Shell.Builder().useSU().open();
                     progressDialog.cancel();
-                    logsBro("logcat");
+                    rootSession("logcat");
                     break;
             }
         }
     };
+
+    private void rootSession(String logType) {
+        if (rootSession != null) {
+            if (rootSession.isRunning()) {
+                rootSession.kill();
+            }
+        }
+        rootSession = new Shell.Builder().useSU().open();
+        logsBro(logType);
+    }
 
     private void logsBro(String logLevel) {
         Log.d(TAG, "logLevel: " + logLevel);
