@@ -1,38 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
-        android:id="@+id/logLevel"
-        android:orderInCategory="100"
-        android:title="LogLevel">
-    <menu>
-       <item
-           android:id="@+id/verbose"
-           android:title="Verbose (Deafault)">
-         </item>
-        <item
-            android:id="@+id/debug"
-            android:title="Debug">
-        </item>
-        <item
-            android:id="@+id/info"
-            android:title="Info">
-        </item>
-        <item
-            android:id="@+id/warning"
-            android:title="Warning">
-        </item>
-        <item
-            android:id="@+id/error"
-            android:title="Error">
-        </item>
-        <item
-            android:id="@+id/fatal"
-            android:title="Fatal">
-        </item>
+    <item android:id="@+id/action_search"
+        android:title="Search"
+        android:icon="@android:drawable/ic_menu_search"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="always"/>
 
-    </menu>
-</item>
 </menu>

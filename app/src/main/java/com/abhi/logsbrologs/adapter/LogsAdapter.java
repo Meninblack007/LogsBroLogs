@@ -6,8 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.abhi.logsbrologs.MainActivity;
 import com.abhi.logsbrologs.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,12 +18,14 @@ import java.util.List;
 
 public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.MyViewHolder> {
 
-    private List<LogsModel> logsModelList;
+    private List<LogsModel> logsModelList,itemsCopy;
     private Context mContext;
 
     public LogsAdapter(Context context, List<LogsModel> logs) {
         logsModelList = logs;
         mContext = context;
+        this.itemsCopy=new ArrayList<>();
+        this.itemsCopy.addAll(this.logsModelList);
     }
 
     @Override
@@ -33,6 +37,24 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.MyViewHolder> 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         holder.title.setText(logsModelList.get(position).getLog());
+    }
+
+
+
+    public void filter(String text) {
+        logsModelList.clear();
+        if(text.isEmpty()){
+            MainActivity.isSearching = false;
+            logsModelList.addAll(itemsCopy);
+        } else{
+            text = text.toLowerCase();
+            for(LogsModel item: itemsCopy){
+                if(item.getLog().toLowerCase().contains(text)){
+                    logsModelList.add(item);
+                }
+            }
+        }
+        notifyDataSetChanged();
     }
 
     @Override

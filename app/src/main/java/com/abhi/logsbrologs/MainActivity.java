@@ -1,6 +1,7 @@
 package com.abhi.logsbrologs;
 
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.support.v7.widget.SearchView;
 
 import com.abhi.logsbrologs.adapter.LogsModel;
 import com.abhi.logsbrologs.adapter.LogsAdapter;
@@ -25,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private LogsAdapter logsAdapter;
     private List<LogsModel> list = new ArrayList<>();
     boolean shouldSetAdapter = true;
-    private int count =0;
+    public static boolean isSearching = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         rootSession = new Shell.Builder().useSU().open();
         initViews();
-        logsBro("");
+        logsBro();
     }
 
     @Override
@@ -52,49 +54,32 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        list.clear();
         Log.d(TAG, "onStop");
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id. verbose:
-                logsBro("logcat");
-                list.clear();
-                break;
-            case R.id.debug:
-                logsBro("logcat *:D");
-                list.clear();
-                break;
-            case R.id.info:
-                logsBro("logcat *:I");
-                list.clear();
-                break;
-            case R.id.warning:
-                logsBro("logcat *:W");
-                list.clear();
-                break;
-            case R.id.error:
-                logsBro("logcat *:E");
-                list.clear();
-                break;
-            case R.id.fatal:
-                logsBro("logcat *:F");
-                list.clear();
-                break;
-            default:
-                logsBro("logcat");
-                list.clear();
-        }
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                isSearching=true;
+                logsAdapter.filter(query);
+                recyclerView.scrollToPosition(0);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return true;
+            }
+        });
         return true;
     }
+
 
 
     private void initViews() {
@@ -105,10 +90,9 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
     }
 
-    private void logsBro(String logLevel) {
-        Log.d(TAG, "loglevel: " + logLevel);
+    private void logsBro() {
         if (Shell.SU.available()) {
-            rootSession.addCommand(new String[]{logLevel}, 0, new Shell.OnCommandLineListener() {
+            rootSession.addCommand(new String[]{"logcat"}, 0, new Shell.OnCommandLineListener() {
                 @Override
                 public void onCommandResult(int commandCode, int exitCode) {
                     Log.d(TAG, "onCommandResult: " + commandCode);
@@ -116,17 +100,16 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onLine(String line) {
-                    if (count++ > 10000) {
-                        list.clear();
-                    }
                     list.add(new LogsModel(line));
-                    logsAdapter = new LogsAdapter(getApplicationContext(), list);
-                    if (shouldSetAdapter) {
-                        shouldSetAdapter = false;
-                        recyclerView.setAdapter(logsAdapter);
+                    if(!isSearching){
+                        logsAdapter = new LogsAdapter(getApplicationContext(), list);
+                        if (shouldSetAdapter) {
+                            shouldSetAdapter = false;
+                            recyclerView.setAdapter(logsAdapter);
+                        }
+                        recyclerView.getAdapter().notifyDataSetChanged();
+                        //recyclerView.scrollToPosition(list.size() - 1);
                     }
-                    recyclerView.getAdapter().notifyDataSetChanged();
-                    recyclerView.scrollToPosition(list.size() - 1);
                 }
             });
         }
