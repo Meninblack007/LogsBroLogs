@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,7 +11,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.abhi.logsbrologs.adapter.LogsAdapter;
 import com.abhi.logsbrologs.adapter.LogsModel;
@@ -34,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private int count = 0;
     private ProgressDialog progressDialog;
     private boolean isScrollStateIdle = true;
+    private LinearLayoutManager mLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
     private void initViews() {
         Log.d(TAG, "initViews");
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        final LinearLayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         logsAdapter = new LogsAdapter(getApplicationContext(), list);
@@ -128,6 +127,8 @@ public class MainActivity extends AppCompatActivity {
                 int pastVisibleItems = mLayoutManager.findFirstVisibleItemPosition();
                 if (pastVisibleItems + visibleItemCount >= totalItemCount) {
                     isScrollStateIdle = true;
+                } else {
+                    isScrollStateIdle = false;
                 }
             }
         });
