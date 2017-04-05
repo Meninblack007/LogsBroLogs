@@ -168,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLine(String line) {
                 if (count++ > 10000) {
+                    count = 0;
                     list.clear();
                 }
                 list.add(new LogsModel(line));
