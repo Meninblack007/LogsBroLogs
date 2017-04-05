@@ -6,6 +6,8 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.abhi.logsbrologs.adapter.LogsModel;
 import com.abhi.logsbrologs.adapter.LogsAdapter;
@@ -32,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         rootSession = new Shell.Builder().useSU().open();
         initViews();
-        logsBro();
+        logsBro("");
     }
 
     @Override
@@ -54,6 +56,47 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onStop");
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id. verbose:
+                logsBro("logcat");
+                list.clear();
+                break;
+            case R.id.debug:
+                logsBro("logcat *:D");
+                list.clear();
+                break;
+            case R.id.info:
+                logsBro("logcat *:I");
+                list.clear();
+                break;
+            case R.id.warning:
+                logsBro("logcat *:W");
+                list.clear();
+                break;
+            case R.id.error:
+                logsBro("logcat *:E");
+                list.clear();
+                break;
+            case R.id.fatal:
+                logsBro("logcat *:F");
+                list.clear();
+                break;
+            default:
+                logsBro("logcat");
+                list.clear();
+        }
+        return true;
+    }
+
+
     private void initViews() {
         Log.d(TAG, "initViews");
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
@@ -62,9 +105,10 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
     }
 
-    private void logsBro() {
+    private void logsBro(String logLevel) {
+        Log.d(TAG, "loglevel: " + logLevel);
         if (Shell.SU.available()) {
-            rootSession.addCommand(new String[]{"logcat"}, 0, new Shell.OnCommandLineListener() {
+            rootSession.addCommand(new String[]{logLevel}, 0, new Shell.OnCommandLineListener() {
                 @Override
                 public void onCommandResult(int commandCode, int exitCode) {
                     Log.d(TAG, "onCommandResult: " + commandCode);
