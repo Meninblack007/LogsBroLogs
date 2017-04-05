@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private LogsAdapter logsAdapter;
     private List<LogsModel> list = new ArrayList<>();
     boolean shouldSetAdapter = true;
+    private int count =0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        list.clear();
         Log.d(TAG, "onStop");
     }
 
@@ -70,6 +72,9 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onLine(String line) {
+                    if (count++ > 10000) {
+                        list.clear();
+                    }
                     list.add(new LogsModel(line));
                     logsAdapter = new LogsAdapter(getApplicationContext(), list);
                     if (shouldSetAdapter) {
