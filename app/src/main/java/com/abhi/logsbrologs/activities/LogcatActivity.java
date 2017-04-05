@@ -2,10 +2,12 @@ package com.abhi.logsbrologs.activities;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +35,7 @@ public class LogcatActivity extends AppCompatActivity {
     private int count = 0;
     private boolean isScrollStateIdle = true;
     private LinearLayoutManager mLayoutManager;
+    public static boolean isSearching = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,7 +67,23 @@ public class LogcatActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
-        return super.onCreateOptionsMenu(menu);
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                isSearching = true;
+                logsAdapter.filter(query);
+                recyclerView.scrollToPosition(0);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return true;
+            }
+        });
+        return true;
     }
 
     @Override
@@ -155,8 +174,11 @@ public class LogcatActivity extends AppCompatActivity {
                     list.clear();
                 }
                 list.add(new LogsModel(line));
-                recyclerView.getAdapter().notifyDataSetChanged();
-                if (isScrollStateIdle) recyclerView.scrollToPosition(list.size() - 1);
+                if (!isSearching) {
+                    logsAdapter = new LogsAdapter(getApplicationContext(), list);
+                    recyclerView.getAdapter().notifyDataSetChanged();
+                    if (isScrollStateIdle) recyclerView.scrollToPosition(list.size() - 1);
+                }
             }
         });
     }
