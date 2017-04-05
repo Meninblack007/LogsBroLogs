@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.abhi.logsbrologs.adapter.LogsAdapter;
 import com.abhi.logsbrologs.adapter.LogsModel;
@@ -31,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private List<LogsModel> list = new ArrayList<>();
     private int count = 0;
     private ProgressDialog progressDialog;
+    private boolean isScrollStateIdle = true;
+    private FloatingActionButton floatingActionButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,9 +109,30 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         logsAdapter = new LogsAdapter(getApplicationContext(), list);
         recyclerView.setAdapter(logsAdapter);
+        floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Checking for SU");
         progressDialog.show();
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    isScrollStateIdle = false;
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isScrollStateIdle = true;
+            }
+        });
         handler.sendEmptyMessage(CHECKING_SUPER_SU);
     }
 
@@ -147,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 list.add(new LogsModel(line));
                 recyclerView.getAdapter().notifyDataSetChanged();
-                recyclerView.scrollToPosition(list.size() - 1);
+                if (isScrollStateIdle) recyclerView.scrollToPosition(list.size() - 1);
             }
         });
     }
