@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         rootSession = new Shell.Builder().useSU().open();
         initViews();
-        logsBro("");
+        logsBro("logcat");
     }
 
     @Override
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id. verbose:
+            case R.id.verbose:
                 logsBro("logcat");
                 list.clear();
                 break;
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             default:
                 logsBro("logcat");
-                list.clear();
+                break;
         }
         return true;
     }
