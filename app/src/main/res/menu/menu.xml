@@ -10,7 +10,7 @@
     <menu>
        <item
            android:id="@+id/verbose"
-           android:title="Verbose (Deafault)">
+           android:title="Verbose (Default)">
          </item>
         <item
             android:id="@+id/debug"
