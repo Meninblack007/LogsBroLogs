@@ -55,6 +55,7 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.MyViewHolder> 
                     break;
                 case 'F':
                     holder.title.setTextColor(mContext.getColor(R.color.red));
+                    break;
                 default:
                     holder.title.setText(logsModelList.get(position).getLog());
                     break;
