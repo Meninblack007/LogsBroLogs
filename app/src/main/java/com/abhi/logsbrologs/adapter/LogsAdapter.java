@@ -57,7 +57,7 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.MyViewHolder> 
                     holder.title.setTextColor(mContext.getColor(R.color.red));
                     break;
                 default:
-                    holder.title.setText(logsModelList.get(position).getLog());
+                    holder.title.setTextColor(mContext.getColor(R.color.white));
                     break;
             }
         }
