@@ -34,4 +34,7 @@
 
     </menu>
 </item>
+    <item
+        android:id="@+id/clear"
+        android:title="Clear" />
 </menu>

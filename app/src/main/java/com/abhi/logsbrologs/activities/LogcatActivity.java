@@ -94,6 +94,9 @@ public class LogcatActivity extends AppCompatActivity {
                 list.clear();
                 rootSession("logcat *:F");
                 break;
+            case R.id.clear:
+                list.clear();
+                break;
         }
         return true;
     }
