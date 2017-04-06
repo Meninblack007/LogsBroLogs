@@ -28,7 +28,7 @@ import eu.chainfire.libsuperuser.Shell;
 
 public class LogcatActivity extends AppCompatActivity {
 
-    private static final String TAG = "LogsBroLogs";
+    private static final String TAG = "LogcatActivity";
     private static final int CHECKING_SUPER_SU = 0;
     private static final int SUPER_SU_GRANTED = 1;
     private Shell.Interactive rootSession;

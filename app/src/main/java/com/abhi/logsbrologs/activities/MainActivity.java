@@ -13,8 +13,8 @@ import eu.chainfire.libsuperuser.Shell;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "LogsBroLogs";
-    public boolean isSuAvailable;
+    private static final String TAG = "MainActivity";
+    private boolean isSuAvailable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
