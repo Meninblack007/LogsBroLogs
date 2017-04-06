@@ -161,7 +161,7 @@ public class LogcatActivity extends AppCompatActivity {
                     list.clear();
                 }
                 list.add(new LogsModel(line));
-                recyclerView.getAdapter().notifyDataSetChanged();
+                logsAdapter.notifyDataSetChanged();
                 if (isScrollStateIdle) recyclerView.scrollToPosition(list.size() - 1);
             }
         });
