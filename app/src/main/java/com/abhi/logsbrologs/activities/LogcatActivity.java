@@ -11,15 +11,23 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.abhi.logsbrologs.R;
 import com.abhi.logsbrologs.adapter.LogsAdapter;
 import com.abhi.logsbrologs.adapter.LogsModel;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import eu.chainfire.libsuperuser.Shell;
+
+import static com.mikepenz.materialdrawer.R.styleable.View;
 
 /**
  * Created by parth on 6/4/17.
@@ -36,6 +44,8 @@ public class LogcatActivity extends AppCompatActivity {
     private boolean isScrollStateIdle = true;
     private LinearLayoutManager mLayoutManager;
 
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +53,26 @@ public class LogcatActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate");
         initViews();
         rootSession("logcat");
+        //new DrawerBuilder().withActivity(this).build();
+
+        new DrawerBuilder()
+                 .withActivity(this)
+                 .withCloseOnClick(true)
+                 .withTranslucentStatusBar(false)
+                .addDrawerItems(
+                        new PrimaryDrawerItem().withIdentifier(1).withName("Radio")
+                )
+
+                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        if (drawerItem.getIdentifier() == 1){
+
+                        }
+                        return true;
+                    }
+                })
+                .build();
     }
 
     @Override
