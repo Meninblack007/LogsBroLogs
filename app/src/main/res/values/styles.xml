@@ -8,4 +8,12 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!-- Application start page theme. -->
+    <style name="AppStartTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorStartPrimary</item>
+        <item name="colorPrimaryDark">@color/colorStartPrimaryDark</item>
+        <item name="colorAccent">@color/colorStartAccent</item>
+    </style>
+
 </resources>

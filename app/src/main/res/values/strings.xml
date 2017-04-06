@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">LogsBroLogs</string>
+    <string name="checking_root">Checking root…</string>
+    <string name="logcat">Logcat</string>
 </resources>
