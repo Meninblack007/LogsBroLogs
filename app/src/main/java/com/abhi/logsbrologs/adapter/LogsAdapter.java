@@ -32,6 +32,34 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.MyViewHolder> 
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
+        String log = logsModelList.get(position).getLog();
+        String [] splitWord = log.split("\\s+");
+        if (splitWord.length > 4 ) {
+            char logType = splitWord[4].charAt(0);
+            switch (logType) {
+                case 'E':
+                case 'A':
+                    holder.title.setTextColor(mContext.getColor(R.color.orange));
+                    break;
+                case 'W':
+                    holder.title.setTextColor(mContext.getColor(R.color.yellow));
+                    break;
+                case 'D':
+                    holder.title.setTextColor(mContext.getColor(R.color.blue));
+                    break;
+                case 'I':
+                    holder.title.setTextColor(mContext.getColor(R.color.yellow));
+                    break;
+                case 'V':
+                    holder.title.setTextColor(mContext.getColor(R.color.blue));
+                    break;
+                case 'F':
+                    holder.title.setTextColor(mContext.getColor(R.color.red));
+                default:
+                    holder.title.setText(logsModelList.get(position).getLog());
+                    break;
+            }
+        }
         holder.title.setText(logsModelList.get(position).getLog());
     }
 
