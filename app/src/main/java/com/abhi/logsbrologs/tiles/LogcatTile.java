@@ -1,4 +1,4 @@
-package com.abhi.logsbrologs;
+package com.abhi.logsbrologs.tiles;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;

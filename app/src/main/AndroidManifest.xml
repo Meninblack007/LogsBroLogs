@@ -22,7 +22,7 @@
             android:name=".activities.LogcatActivity"
             android:label="@string/logcat" />
 
-        <service android:name=".LogcatTile"
+        <service android:name=".tiles.LogcatTile"
             android:icon="@drawable/ic_grade_black_24dp"
             android:label="LogsBroLogs"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
