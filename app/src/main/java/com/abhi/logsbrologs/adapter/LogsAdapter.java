@@ -25,7 +25,7 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.MyViewHolder> 
         logsModelList = logs;
         mContext = context;
         //this.itemsCopy=new ArrayList<>();
-        this.itemsCopy.addAll(this.logsModelList);
+        //this.itemsCopy.addAll(this.logsModelList);
     }
 
     @Override
@@ -40,22 +40,22 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.MyViewHolder> 
     }
 
 
-
-    public void filter(String text) {
-    //    logsModelList.clear();
-        if(text.isEmpty()){
-            MainActivity.isSearching = false;
-            logsModelList.addAll(itemsCopy);
-        } else{
-            text = text.toLowerCase();
-            for(LogsModel item: itemsCopy){
-                if(item.getLog().toLowerCase().contains(text)){
-                    logsModelList.add(item);
-                }
-            }
-        }
-        notifyDataSetChanged();
-    }
+//
+//    public void filter(String text) {
+//    //    logsModelList.clear();
+//        if(text.isEmpty()){
+//            MainActivity.isSearching = false;
+//            logsModelList.addAll(itemsCopy);
+//        } else{
+//            text = text.toLowerCase();
+//            for(LogsModel item: itemsCopy){
+//                if(item.getLog().toLowerCase().contains(text)){
+//                    logsModelList.add(item);
+//                }
+//            }
+//        }
+//        notifyDataSetChanged();
+//    }
 
     @Override
     public int getItemCount() {

@@ -24,8 +24,9 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "LogsBroLogs";
     private Shell.Interactive rootSession;
     private RecyclerView recyclerView;
-    private LogsAdapter logsAdapter;
-    private List<LogsModel> list = new ArrayList<>(),searchList;
+    private LogsAdapter logsAdapter,searchAdapter;
+    private List<LogsModel> list = new ArrayList<>();
+    private List<LogsModel> searchList = new ArrayList<>();
     boolean shouldSetAdapter = true;
     public static boolean isSearching = false;
 
@@ -118,13 +119,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
     private void filter(String text) {
-if (text!=null && !text.equals"") {
+if (text!=null && !text.equals("")) {
 searchList.clear();
                          for(LogsModel item: list){
                              if(item.getLog().toLowerCase().contains(text))
                                   searchList.add(item);
                         }
-logsSearchAdapter = new LogsAdapter(getApplicationContext(), searchList);
+    searchAdapter = new LogsAdapter(getApplicationContext(), searchList);
 recyclerView.setAdapter(searchAdapter);
 }else {
 
