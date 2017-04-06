@@ -36,7 +36,6 @@ public class LogcatActivity extends AppCompatActivity {
     private LogsAdapter logsAdapter;
     private List<LogsModel> list = new ArrayList<>();
     private int count = 0;
-    private ProgressDialog progressDialog;
     private boolean isScrollStateIdle = true;
     private LinearLayoutManager mLayoutManager;
 
@@ -112,9 +111,6 @@ public class LogcatActivity extends AppCompatActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         logsAdapter = new LogsAdapter(getApplicationContext(), list);
         recyclerView.setAdapter(logsAdapter);
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Checking for SU");
-        progressDialog.show();
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             @Override
@@ -150,7 +146,6 @@ public class LogcatActivity extends AppCompatActivity {
                     }
                     break;
                 case SUPER_SU_GRANTED:
-                    progressDialog.cancel();
                     rootSession("logcat");
                     break;
             }
