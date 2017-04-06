@@ -1,9 +1,6 @@
 package com.abhi.logsbrologs.activities;
 
-import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -29,8 +26,6 @@ import eu.chainfire.libsuperuser.Shell;
 public class LogcatActivity extends AppCompatActivity {
 
     private static final String TAG = "LogcatActivity";
-    private static final int CHECKING_SUPER_SU = 0;
-    private static final int SUPER_SU_GRANTED = 1;
     private Shell.Interactive rootSession;
     private RecyclerView recyclerView;
     private LogsAdapter logsAdapter;
@@ -44,8 +39,8 @@ public class LogcatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logcat);
         Log.d(TAG, "onCreate");
-        Shell.SU.run("");
         initViews();
+        rootSession("logcat");
     }
 
     @Override
@@ -130,27 +125,7 @@ public class LogcatActivity extends AppCompatActivity {
                 isScrollStateIdle = pastVisibleItems + visibleItemCount >= totalItemCount;
             }
         });
-        handler.sendEmptyMessage(CHECKING_SUPER_SU);
     }
-
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case CHECKING_SUPER_SU:
-                    if (Shell.SU.available()) {
-                        handler.sendEmptyMessage(SUPER_SU_GRANTED);
-                    } else {
-                        handler.sendEmptyMessageDelayed(0, 250);
-                    }
-                    break;
-                case SUPER_SU_GRANTED:
-                    rootSession("logcat");
-                    break;
-            }
-        }
-    };
 
     private void rootSession(String logType) {
         if (rootSession != null) {
