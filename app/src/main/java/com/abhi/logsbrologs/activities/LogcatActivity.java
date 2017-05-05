@@ -8,11 +8,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.abhi.logsbrologs.Constants;
 import com.abhi.logsbrologs.R;
 import com.abhi.logsbrologs.adapter.LogsItem;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import eu.chainfire.libsuperuser.Shell;
 
 /**
@@ -160,7 +164,42 @@ public class LogcatActivity extends AppCompatActivity {
                     count = 0;
                     fastItemAdapter.clear();
                 }
-                fastItemAdapter.add(new LogsItem(line + "\n"));
+                String time = null;
+                String log = null;
+                String loglevelStr = null;
+                line.trim();
+                List<String> templist = new ArrayList<String>();
+                //Log.i("TAG", "LINE" + line);
+                Pattern pattern = Pattern.compile("(\\S+)");
+                Matcher matcher = pattern.matcher(line);
+                while (matcher.find()) {
+                    templist.add(matcher.group());
+                }
+                if (templist.size() > 4) {
+                    time = templist.get(1);
+                    loglevelStr = templist.get(4);
+                    int logIndex = line.indexOf(loglevelStr);
+                    log = line.substring(logIndex > -1 ? logIndex + 2: 0);
+                }
+
+                // Log.i("TAG", "TIME$$"+time+"$$"+loglevelStr+"$$"+log+"$$");
+                Constants.Loglevel loglevel;
+                if ("I".equals(loglevelStr))
+                    loglevel = Constants.Loglevel.LOGLEVEL_I;
+                else if ("V".equals(loglevelStr))
+                    loglevel = Constants.Loglevel.LOGLEVEL_V;
+                else if ("W".equals(loglevelStr))
+                    loglevel = Constants.Loglevel.LOGLEVEL_W;
+                else if ("D".equals(loglevelStr))
+                    loglevel = Constants.Loglevel.LOGLEVEL_D;
+                else if ("E".equals(loglevelStr))
+                    loglevel = Constants.Loglevel.LOGLEVEL_E;
+                else if ("F".equals(loglevelStr))
+                    loglevel = Constants.Loglevel.LOGLEVEL_F;
+                else
+                    loglevel = Constants.Loglevel.LOGLEVEL_UNDEFINED;
+
+                fastItemAdapter.add(new LogsItem(log, time, loglevel));
                 if (isScrollStateIdle) recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
             }
         });
