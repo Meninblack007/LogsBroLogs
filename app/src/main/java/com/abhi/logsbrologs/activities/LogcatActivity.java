@@ -89,6 +89,7 @@ public class LogcatActivity extends AppCompatActivity {
                 rootSession("logcat *:F");
                 break;
             case R.id.clear:
+                fastItemAdapter.clear();
                 break;
         }
         return true;
@@ -109,7 +110,6 @@ public class LogcatActivity extends AppCompatActivity {
         recyclerView.setAdapter(fastItemAdapter);
 
         recyclerView.setItemAnimator(null);
-
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
@@ -137,7 +137,6 @@ public class LogcatActivity extends AppCompatActivity {
         outState = fastItemAdapter.saveInstanceState(outState);
         super.onSaveInstanceState(outState);
     }
-
 
     private void rootSession(String logType) {
         if (rootSession != null) {

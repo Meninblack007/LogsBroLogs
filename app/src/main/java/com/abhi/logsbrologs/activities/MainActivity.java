@@ -56,6 +56,10 @@ public class MainActivity extends AppCompatActivity {
                 // Close the application if root not detected
                 finish();
             }
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {}
+
             return null;
         }
 
@@ -69,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
                 Intent logIntent = new Intent(MainActivity.this, LogcatActivity.class);
                 startActivity(logIntent);
                 finish();
+
+
             }
         }
 
