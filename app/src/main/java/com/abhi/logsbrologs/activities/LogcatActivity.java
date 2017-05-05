@@ -1,11 +1,7 @@
 package com.abhi.logsbrologs.activities;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,11 +9,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.abhi.logsbrologs.R;
-import com.abhi.logsbrologs.adapter.LogsAdapter;
-import com.abhi.logsbrologs.adapter.LogsModel;
+import com.abhi.logsbrologs.adapter.LogsItem;
+import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import eu.chainfire.libsuperuser.Shell;
 
@@ -30,19 +24,19 @@ public class LogcatActivity extends AppCompatActivity {
     private static final String TAG = "LogcatActivity";
     private Shell.Interactive rootSession;
     private RecyclerView recyclerView;
-    private LogsAdapter logsAdapter;
-    private List<LogsModel> list = new ArrayList<>();
+    private FastItemAdapter<LogsItem> fastItemAdapter;
     private int count = 0;
     private boolean isScrollStateIdle = true;
     private LinearLayoutManager mLayoutManager;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logcat);
         Log.d(TAG, "onCreate");
         initViews();
         rootSession("logcat");
+        fastItemAdapter.withSavedInstanceState(savedInstanceState);
     }
 
     @Override
@@ -73,31 +67,24 @@ public class LogcatActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.verbose:
-                list.clear();
                 rootSession("logcat");
                 break;
             case R.id.debug:
-                list.clear();
                 rootSession("logcat *:D");
                 break;
             case R.id.info:
-                list.clear();
                 rootSession("logcat *:I");
                 break;
             case R.id.warning:
-                list.clear();
                 rootSession("logcat *:W");
                 break;
             case R.id.error:
-                list.clear();
                 rootSession("logcat *:E");
                 break;
             case R.id.fatal:
-                list.clear();
                 rootSession("logcat *:F");
                 break;
             case R.id.clear:
-                list.clear();
                 break;
         }
         return true;
@@ -105,16 +92,21 @@ public class LogcatActivity extends AppCompatActivity {
 
     private void initViews() {
         Log.d(TAG, "initViews");
+        rootSession = new Shell.Builder().useSU().open();
+
+        fastItemAdapter = new FastItemAdapter<>();
+        fastItemAdapter.withSelectable(true);
+        fastItemAdapter.withPositionBasedStateManagement(true);
+
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        mLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(mLayoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this,
-                mLayoutManager.getOrientation());
-        dividerItemDecoration.setDrawable(ContextCompat.getDrawable(this, R.drawable.divider));
-        recyclerView.addItemDecoration(dividerItemDecoration);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        logsAdapter = new LogsAdapter(getApplicationContext(), list);
-        recyclerView.setAdapter(logsAdapter);
+        recyclerView.setAdapter(fastItemAdapter);
+
+        recyclerView.setItemAnimator(null);
+
+
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             @Override
@@ -136,12 +128,20 @@ public class LogcatActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState = fastItemAdapter.saveInstanceState(outState);
+        super.onSaveInstanceState(outState);
+    }
+
+
     private void rootSession(String logType) {
         if (rootSession != null) {
             if (rootSession.isRunning()) {
                 rootSession.kill();
             }
         }
+        fastItemAdapter.clear();
         rootSession = new Shell.Builder().useSU().open();
         logsBro(logType);
     }
@@ -158,11 +158,10 @@ public class LogcatActivity extends AppCompatActivity {
             public void onLine(String line) {
                 if (count++ > 10000) {
                     count = 0;
-                    list.clear();
+                    fastItemAdapter.clear();
                 }
-                list.add(new LogsModel(line));
-                logsAdapter.notifyDataSetChanged();
-                if (isScrollStateIdle) recyclerView.scrollToPosition(list.size() - 1);
+                fastItemAdapter.add(new LogsItem(line + "\n"));
+                if (isScrollStateIdle) recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
             }
         });
     }
