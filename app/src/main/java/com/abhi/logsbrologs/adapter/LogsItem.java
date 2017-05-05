@@ -27,6 +27,14 @@ public class LogsItem extends AbstractItem<LogsItem, LogsItem.ViewHolder> {
         this.loglevel = loglevel;
     }
 
+    public String setLog() {
+        return log;
+    }
+
+    public String getLog() {
+        return log;
+    }
+
     @Override
     public int getType() {
         return R.id.log;

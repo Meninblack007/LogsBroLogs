@@ -11,7 +11,11 @@ import android.view.MenuItem;
 import com.abhi.logsbrologs.Constants;
 import com.abhi.logsbrologs.R;
 import com.abhi.logsbrologs.adapter.LogsItem;
+import com.lapism.searchview.SearchView;
+import com.mikepenz.fastadapter.IItemAdapter;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
+import com.mikepenz.fastadapter.adapters.ItemAdapter.ItemFilterListener;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +45,7 @@ public class LogcatActivity extends AppCompatActivity {
         initViews();
         rootSession("logcat");
         fastItemAdapter.withSavedInstanceState(savedInstanceState);
+
     }
 
     @Override
@@ -108,8 +113,9 @@ public class LogcatActivity extends AppCompatActivity {
         mLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(fastItemAdapter);
-
         recyclerView.setItemAnimator(null);
+
+        final SearchView searchView = (SearchView) findViewById(R.id.searchView);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
@@ -130,13 +136,41 @@ public class LogcatActivity extends AppCompatActivity {
                 isScrollStateIdle = pastVisibleItems + visibleItemCount >= totalItemCount;
             }
         });
+
+        fastItemAdapter.withFilterPredicate(new IItemAdapter.Predicate<LogsItem>() {
+            @Override
+            public boolean filter(LogsItem item, CharSequence constraint) {
+                return !item.getLog().toLowerCase().contains(constraint.toString().toLowerCase());
+            }
+        });
+       // fastItemAdapter.getItemAdapter().withItemFilterListener(this);
+
+
+        searchView.setHint("Search");
+        searchView.setFocusable(false);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                searchView.close(true);
+                fastItemAdapter.filter(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                fastItemAdapter.filter(newText);
+                return true;
+
+            }
+        });
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState = fastItemAdapter.saveInstanceState(outState);
-        super.onSaveInstanceState(outState);
-    }
+        @Override
+        protected void onSaveInstanceState (Bundle outState){
+            outState = fastItemAdapter.saveInstanceState(outState);
+            super.onSaveInstanceState(outState);
+        }
+
 
     private void rootSession(String logType) {
         if (rootSession != null) {

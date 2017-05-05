@@ -10,6 +10,13 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:overScrollMode="never"
+        android:paddingTop="58dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <com.lapism.searchview.SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:search_voice="false"/>
 </android.support.constraint.ConstraintLayout>
