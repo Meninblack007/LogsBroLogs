@@ -82,7 +82,7 @@ public class LogcatActivity extends AppCompatActivity {
                             rootSession("logcat");
                         } else if (drawerItem.getIdentifier() == 1) {
                             fastItemAdapter.clear();
-                            rootSession("denials");
+                            rootSession("dmesg | grep \"avc: denied\"");
                         }
                         return false;
                     }
@@ -228,29 +228,26 @@ public class LogcatActivity extends AppCompatActivity {
         logsBro(logType);
     }
 
-    private void logsBro(final String logLevel) {
-        //   Log.d(TAG, "logLevel: " + logLevel);
+    private void logsBro(final String logType) {
         fastItemAdapter.clear();
-        if (!logLevel.equals("denials")) {
-            rootSession.addCommand(new String[]{logLevel}, 0, new Shell.OnCommandLineListener() {
-                @Override
-                public void onCommandResult(int commandCode, int exitCode) {
-                    Log.d(TAG, "onCommandResult: " + commandCode);
+        rootSession.addCommand(new String[]{logType}, 0, new Shell.OnCommandLineListener() {
+            @Override
+            public void onCommandResult(int commandCode, int exitCode) {
+                Log.d(TAG, "onCommandResult: " + commandCode);
+            }
+
+            @Override
+            public void onLine(String line) {
+                if (count++ > 10000) {
+                    count = 0;
+                    fastItemAdapter.clear();
                 }
-
-                @Override
-                public void onLine(String line) {
-                    if (count++ > 10000) {
-                        count = 0;
-                        fastItemAdapter.clear();
-                    }
-
+                if (!logType.contains("denied")) {
                     String time = null;
                     String log = null;
                     String loglevelStr = null;
                     line.trim();
                     List<String> templist = new ArrayList<String>();
-                    //Log.i("TAG", "LINE" + line);
                     Pattern pattern = Pattern.compile("(\\S+)");
                     Matcher matcher = pattern.matcher(line);
                     while (matcher.find()) {
@@ -263,7 +260,6 @@ public class LogcatActivity extends AppCompatActivity {
                         log = line.substring(logIndex > -1 ? logIndex + 2 : 0);
                     }
 
-                    // Log.i("TAG", "TIME$$"+time+"$$"+loglevelStr+"$$"+log+"$$");
                     Constants.LogLevel loglevel;
                     if ("I".equals(loglevelStr))
                         loglevel = Constants.LogLevel.LOGLEVEL_I;
@@ -279,29 +275,13 @@ public class LogcatActivity extends AppCompatActivity {
                         loglevel = Constants.LogLevel.LOGLEVEL_F;
                     else
                         loglevel = Constants.LogLevel.LOGLEVEL_UNDEFINED;
-
                     ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(log, time, loglevel));
-                    if (isScrollStateIdle) recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
-                }
-            });
-        } else {
-            rootSession.addCommand(new String[]{"dmesg | grep \"avc: denied\""}, 0, new Shell.OnCommandLineListener() {
-                @Override
-                public void onCommandResult(int commandCode, int exitCode) {
-                    Log.d(TAG, "onCommandResult: " + commandCode);
-                }
-
-                @Override
-                public void onLine(String line) {
-                    if (count++ > 10000) {
-                        count = 0;
-                        fastItemAdapter.clear();
-                    }
-                    line.trim();
+                } else {
                     ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(line, null, Constants.LogLevel.LOGLEVEL_DENIALS));
-                    if (isScrollStateIdle) recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
                 }
-            });
-        }
+                if (isScrollStateIdle)
+                    recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
+            }
+        });
     }
 }
