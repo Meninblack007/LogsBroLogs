@@ -17,7 +17,7 @@ import java.util.List;
 
 public class LogsItem extends AbstractItem<LogsItem, LogsItem.ViewHolder> {
 
-    public String log;
+    private String log;
     private String time;
     private Constants.LogLevel logLevel;
 

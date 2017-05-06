@@ -46,17 +46,17 @@ public class LogcatActivity extends AppCompatActivity {
     private boolean isScrollStateIdle = true;
     private LinearLayoutManager mLayoutManager;
     private Drawer drawer;
-    private AccountHeader header;
+    private boolean isDebuggable = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logcat);
-        Log.d(TAG, "onCreate");
+        if (isDebuggable) Log.d(TAG, "onCreate");
         initViews();
         rootSession("logcat");
         fastItemAdapter.withSavedInstanceState(savedInstanceState);
-        header = new AccountHeaderBuilder()
+        AccountHeader header = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.color.colorPrimary)
                 .withProfileImagesVisible(false)
@@ -94,19 +94,19 @@ public class LogcatActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause");
+        if (isDebuggable) Log.d(TAG, "onPause");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume");
+        if (isDebuggable) Log.d(TAG, "onResume");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(TAG, "onStop");
+        if (isDebuggable) Log.d(TAG, "onStop");
     }
 
     @Override
@@ -144,7 +144,7 @@ public class LogcatActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        Log.d(TAG, "initViews");
+        if (isDebuggable) Log.d(TAG, "initViews");
         rootSession = new Shell.Builder().useSU().open();
         fastItemAdapter = new FastItemAdapter<>();
         fastItemAdapter.withSelectable(true);
@@ -177,11 +177,8 @@ public class LogcatActivity extends AppCompatActivity {
         fastItemAdapter.withFilterPredicate(new IItemAdapter.Predicate<LogsItem>() {
             @Override
             public boolean filter(LogsItem item, CharSequence constraint) {
-                if (item.getLog() != null) {
-                    return !item.getLog().toLowerCase().contains(constraint.toString().toLowerCase());
-                } else {
-                    return true;
-                }
+                return item.getLog() == null ||
+                        !item.getLog().toLowerCase().contains(constraint.toString().toLowerCase());
             }
         });
         // fastItemAdapter.getItemAdapter().withItemFilterListener(this);
@@ -224,16 +221,16 @@ public class LogcatActivity extends AppCompatActivity {
             }
         }
         rootSession = new Shell.Builder().useSU().open();
-        fastItemAdapter.clear();
         logsBro(logType);
     }
 
     private void logsBro(final String logType) {
-        fastItemAdapter.clear();
+        if (isDebuggable) Log.d(TAG, "LogType: " + logType);
+           // fastItemAdapter.clear();
         rootSession.addCommand(new String[]{logType}, 0, new Shell.OnCommandLineListener() {
             @Override
             public void onCommandResult(int commandCode, int exitCode) {
-                Log.d(TAG, "onCommandResult: " + commandCode);
+                if (isDebuggable) Log.d(TAG, "onCommandResult: " + commandCode);
             }
 
             @Override
