@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.abhi.logsbrologs.Constants;
 import com.abhi.logsbrologs.R;
@@ -14,8 +15,17 @@ import com.abhi.logsbrologs.adapter.LogsItem;
 import com.lapism.searchview.SearchView;
 import com.mikepenz.fastadapter.IItemAdapter;
 import com.mikepenz.fastadapter.adapters.ItemAdapter;
+import com.mikepenz.fastadapter.commons.BuildConfig;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
-import com.mikepenz.fastadapter.adapters.ItemAdapter.ItemFilterListener;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 
 import java.util.ArrayList;
@@ -37,6 +47,8 @@ public class LogcatActivity extends AppCompatActivity {
     private int count = 0;
     private boolean isScrollStateIdle = true;
     private LinearLayoutManager mLayoutManager;
+    private Drawer drawer;
+    private AccountHeader header;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +59,40 @@ public class LogcatActivity extends AppCompatActivity {
         rootSession("logcat");
         fastItemAdapter.withSavedInstanceState(savedInstanceState);
 
-    }
+        header = new AccountHeaderBuilder()
+                .withActivity(this)
+                .withHeaderBackground(R.color.colorPrimary)
+                .withProfileImagesVisible(false)
+                .addProfiles(
+                        new ProfileDrawerItem().withName("LogsBroLogs").withEmail(BuildConfig.VERSION_NAME)
+                )
+                .withCurrentProfileHiddenInList(true)
+                .build();
+
+        drawer = new DrawerBuilder()
+                .withActivity(this)
+                .withTranslucentStatusBar(false)
+                .withAccountHeader(header)
+                .addDrawerItems(
+                        new PrimaryDrawerItem().withName("LogCat").withIdentifier(0),
+                        new PrimaryDrawerItem().withName("Denials").withIdentifier(1)
+                )
+                .withCloseOnClick(true)
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+
+                        if(drawerItem.getIdentifier() == 1) {
+                            fastItemAdapter.clear();
+                            rootSession("logcat | grep 'avc: denied'");
+                        }
+
+                        return false;
+                    }
+                })
+                .build ();
+        }
+
 
     @Override
     protected void onPause() {
@@ -167,14 +212,20 @@ public class LogcatActivity extends AppCompatActivity {
 
             }
         });
+        searchView.setOnMenuClickListener(new SearchView.OnMenuClickListener() {
+            @Override
+            public void onMenuClick() {
+                drawer.openDrawer();
+            }
+        });
     }
 
         @Override
         protected void onSaveInstanceState (Bundle outState){
             outState = fastItemAdapter.saveInstanceState(outState);
+            outState = drawer.saveInstanceState(outState);
             super.onSaveInstanceState(outState);
         }
-
 
     private void rootSession(String logType) {
         if (rootSession != null) {
@@ -182,13 +233,14 @@ public class LogcatActivity extends AppCompatActivity {
                 rootSession.kill();
             }
         }
-        fastItemAdapter.clear();
         rootSession = new Shell.Builder().useSU().open();
+        fastItemAdapter.clear();
         logsBro(logType);
     }
 
     private void logsBro(String logLevel) {
-        Log.d(TAG, "logLevel: " + logLevel);
+     //   Log.d(TAG, "logLevel: " + logLevel);
+        fastItemAdapter.clear();
         rootSession.addCommand(new String[]{logLevel}, 0, new Shell.OnCommandLineListener() {
             @Override
             public void onCommandResult(int commandCode, int exitCode) {
