@@ -21,18 +21,18 @@ public class LogsItem extends AbstractItem<LogsItem, LogsItem.ViewHolder> {
     private String time;
     private Constants.Loglevel loglevel;
 
+    public String getLog() {
+        return log;
+    }
+
     public LogsItem(String log, String time, Constants.Loglevel loglevel) {
         this.log = log;
         this.time = time;
         this.loglevel = loglevel;
     }
 
-    public String setLog() {
-        return log;
-    }
-
-    public String getLog() {
-        return log;
+    public void setLog(String log) {
+        this.log =log;
     }
 
     @Override

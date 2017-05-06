@@ -1,5 +1,6 @@
 package com.abhi.logsbrologs.activities;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,8 +15,6 @@ import com.abhi.logsbrologs.adapter.LogsItem;
 import com.lapism.searchview.SearchView;
 import com.mikepenz.fastadapter.IItemAdapter;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
-import com.mikepenz.fastadapter.adapters.ItemAdapter.ItemFilterListener;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +35,8 @@ public class LogcatActivity extends AppCompatActivity {
     private int count = 0;
     private boolean isScrollStateIdle = true;
     private LinearLayoutManager mLayoutManager;
+    private SharedPreferences perf;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +118,9 @@ public class LogcatActivity extends AppCompatActivity {
 
         final SearchView searchView = (SearchView) findViewById(R.id.searchView);
 
+        perf = getApplicationContext().getSharedPreferences("LogMode", 0);
+        editor = perf.edit();
+
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             @Override
@@ -140,7 +144,16 @@ public class LogcatActivity extends AppCompatActivity {
         fastItemAdapter.withFilterPredicate(new IItemAdapter.Predicate<LogsItem>() {
             @Override
             public boolean filter(LogsItem item, CharSequence constraint) {
-                return !item.getLog().toLowerCase().contains(constraint.toString().toLowerCase());
+                if (rootSession != null) {
+                    if (rootSession.isRunning()) {
+                        rootSession.kill();
+                    }
+                }
+                if (item.getLog() != null) {
+                    return !item.getLog().toLowerCase().contains(constraint.toString().toLowerCase());
+                }
+                rootSession(perf.getString("logMode",null));
+                return true;
             }
         });
        // fastItemAdapter.getItemAdapter().withItemFilterListener(this);
@@ -151,16 +164,21 @@ public class LogcatActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                searchView.close(true);
                 fastItemAdapter.filter(query);
+                searchView.close(true);
+                if (query.equals(null) || query.equals("")) {
+                    rootSession(perf.getString("logMode",null));
+                }
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 fastItemAdapter.filter(newText);
+                if (newText.equals(null) || newText.equals("")) {
+                    rootSession(perf.getString("logMode",null));
+                }
                 return true;
-
             }
         });
     }
@@ -181,10 +199,13 @@ public class LogcatActivity extends AppCompatActivity {
         fastItemAdapter.clear();
         rootSession = new Shell.Builder().useSU().open();
         logsBro(logType);
+        editor.putString("logMode", logType);
+        editor.commit();
     }
 
     private void logsBro(String logLevel) {
         Log.d(TAG, "logLevel: " + logLevel);
+
         rootSession.addCommand(new String[]{logLevel}, 0, new Shell.OnCommandLineListener() {
             @Override
             public void onCommandResult(int commandCode, int exitCode) {
@@ -236,5 +257,6 @@ public class LogcatActivity extends AppCompatActivity {
                 if (isScrollStateIdle) recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
             }
         });
+
     }
 }
