@@ -70,19 +70,20 @@ public class LogcatActivity extends AppCompatActivity {
                 .withTranslucentStatusBar(false)
                 .withAccountHeader(header)
                 .addDrawerItems(
-                        new PrimaryDrawerItem().withName("LogCat").withIdentifier(0),
+                        new PrimaryDrawerItem().withName("Logcat").withIdentifier(0),
                         new PrimaryDrawerItem().withName("Denials").withIdentifier(1)
                 )
                 .withCloseOnClick(true)
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-
-                        if (drawerItem.getIdentifier() == 1) {
+                        if (drawerItem.getIdentifier() == 0) {
+                            fastItemAdapter.clear();
+                            rootSession("logcat");
+                        } else if (drawerItem.getIdentifier() == 1) {
                             fastItemAdapter.clear();
                             rootSession("denials");
                         }
-
                         return false;
                     }
                 })
