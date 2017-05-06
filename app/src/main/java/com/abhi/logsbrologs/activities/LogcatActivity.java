@@ -84,7 +84,7 @@ public class LogcatActivity extends AppCompatActivity {
 
                         if(drawerItem.getIdentifier() == 1) {
                             fastItemAdapter.clear();
-                            rootSession("logcat | grep 'avc: denied'");
+                            rootSession("denials");
                         }
 
                         return false;
@@ -238,59 +238,86 @@ public class LogcatActivity extends AppCompatActivity {
         logsBro(logType);
     }
 
-    private void logsBro(String logLevel) {
+    private void logsBro(final String logLevel) {
      //   Log.d(TAG, "logLevel: " + logLevel);
         fastItemAdapter.clear();
-        rootSession.addCommand(new String[]{logLevel}, 0, new Shell.OnCommandLineListener() {
-            @Override
-            public void onCommandResult(int commandCode, int exitCode) {
-                Log.d(TAG, "onCommandResult: " + commandCode);
-            }
-
-            @Override
-            public void onLine(String line) {
-                if (count++ > 10000) {
-                    count = 0;
-                    fastItemAdapter.clear();
-                }
-                String time = null;
-                String log = null;
-                String loglevelStr = null;
-                line.trim();
-                List<String> templist = new ArrayList<String>();
-                //Log.i("TAG", "LINE" + line);
-                Pattern pattern = Pattern.compile("(\\S+)");
-                Matcher matcher = pattern.matcher(line);
-                while (matcher.find()) {
-                    templist.add(matcher.group());
-                }
-                if (templist.size() > 4) {
-                    time = templist.get(1);
-                    loglevelStr = templist.get(4);
-                    int logIndex = line.indexOf(loglevelStr);
-                    log = line.substring(logIndex > -1 ? logIndex + 2: 0);
+        if (!logLevel.equals("denials")) {
+            rootSession.addCommand(new String[]{logLevel}, 0, new Shell.OnCommandLineListener() {
+                @Override
+                public void onCommandResult(int commandCode, int exitCode) {
+                    Log.d(TAG, "onCommandResult: " + commandCode);
                 }
 
-                // Log.i("TAG", "TIME$$"+time+"$$"+loglevelStr+"$$"+log+"$$");
-                Constants.Loglevel loglevel;
-                if ("I".equals(loglevelStr))
-                    loglevel = Constants.Loglevel.LOGLEVEL_I;
-                else if ("V".equals(loglevelStr))
-                    loglevel = Constants.Loglevel.LOGLEVEL_V;
-                else if ("W".equals(loglevelStr))
-                    loglevel = Constants.Loglevel.LOGLEVEL_W;
-                else if ("D".equals(loglevelStr))
-                    loglevel = Constants.Loglevel.LOGLEVEL_D;
-                else if ("E".equals(loglevelStr))
-                    loglevel = Constants.Loglevel.LOGLEVEL_E;
-                else if ("F".equals(loglevelStr))
-                    loglevel = Constants.Loglevel.LOGLEVEL_F;
-                else
-                    loglevel = Constants.Loglevel.LOGLEVEL_UNDEFINED;
+                @Override
+                public void onLine(String line) {
+                    if (count++ > 10000) {
+                        count = 0;
+                        fastItemAdapter.clear();
+                    }
 
-                ((ItemAdapter.ItemFilter)fastItemAdapter.getItemFilter()).add(new LogsItem(log, time, loglevel));
-                if (isScrollStateIdle) recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
-            }
-        });
+                    String time = null;
+                    String log = null;
+                    String loglevelStr = null;
+                    line.trim();
+                    List<String> templist = new ArrayList<String>();
+                    //Log.i("TAG", "LINE" + line);
+                    Pattern pattern = Pattern.compile("(\\S+)");
+                    Matcher matcher = pattern.matcher(line);
+                    while (matcher.find()) {
+                        templist.add(matcher.group());
+                    }
+                    if (templist.size() > 4) {
+                        time = templist.get(1);
+                        loglevelStr = templist.get(4);
+                        int logIndex = line.indexOf(loglevelStr);
+                        log = line.substring(logIndex > -1 ? logIndex + 2 : 0);
+                    }
+
+                    // Log.i("TAG", "TIME$$"+time+"$$"+loglevelStr+"$$"+log+"$$");
+                    Constants.Loglevel loglevel;
+                    if ("I".equals(loglevelStr))
+                        loglevel = Constants.Loglevel.LOGLEVEL_I;
+                    else if ("V".equals(loglevelStr))
+                        loglevel = Constants.Loglevel.LOGLEVEL_V;
+                    else if ("W".equals(loglevelStr))
+                        loglevel = Constants.Loglevel.LOGLEVEL_W;
+                    else if ("D".equals(loglevelStr))
+                        loglevel = Constants.Loglevel.LOGLEVEL_D;
+                    else if ("E".equals(loglevelStr))
+                        loglevel = Constants.Loglevel.LOGLEVEL_E;
+                    else if ("F".equals(loglevelStr))
+                        loglevel = Constants.Loglevel.LOGLEVEL_F;
+                    else
+                        loglevel = Constants.Loglevel.LOGLEVEL_UNDEFINED;
+
+                    ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(log, time, loglevel));
+                    if (isScrollStateIdle)
+                        recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
+                }
+            });
+        } else {
+            rootSession.addCommand(new String[]{"dmesg | grep \"avc: denied\""},0, new Shell.OnCommandLineListener() {
+                @Override
+                public void onCommandResult(int commandCode, int exitCode) {
+                    Log.d(TAG, "onCommandResult: " + commandCode);
+                }
+
+                @Override
+                public void onLine(String line) {
+                    if (count++ > 10000) {
+                        count = 0;
+                        fastItemAdapter.clear();
+                    }
+
+                    line.trim();
+
+                    ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(line,null,Constants.Loglevel.LOGLEVEL_DENIALS));
+
+                    if (isScrollStateIdle)
+                        recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
+                }
+
+            });
+        }
     }
 }

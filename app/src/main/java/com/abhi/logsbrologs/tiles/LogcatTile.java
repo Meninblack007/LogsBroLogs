@@ -47,20 +47,19 @@ public class LogcatTile extends TileService {
                     switch (which) {
                         case 0:
                             Shell.SU.run("logcat -d >" + LOG_FILE);
-                            shareIT(LOG_FILE, "Share Logs File");
+                            shareIt(LOG_FILE, "Share logcat");
                             break;
                         case 1:
                             if (hasRamoops()) {
                                 Shell.SU.run("cat " + RAMOOPS + " > " + RAM_FILE);
-                                shareIT(RAM_FILE, "Share kernel logs");
                             } else {
                                 Shell.SU.run("cat " + LAST_KMSG + " > " + RAM_FILE);
-                                shareIT(RAM_FILE, "Share kernel logs");
                             }
+                            shareIt(RAM_FILE, "Share kernel logs");
                             break;
                         case 2:
                             Shell.SU.run("dmesg >" + DMESG_FILE);
-                            shareIT(DMESG_FILE, "Share dmesg");
+                            shareIt(DMESG_FILE, "Share dmesg");
                             break;
                     }
                 } else {
@@ -83,7 +82,7 @@ public class LogcatTile extends TileService {
         return Boolean.parseBoolean(s);
     }
 
-    public void shareIT(String e, String f) {
+    public void shareIt(String e, String f) {
         Intent shareIntent = new Intent();
         shareIntent.setAction(Intent.ACTION_SEND);
         shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///" + e));

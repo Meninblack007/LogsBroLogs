@@ -72,6 +72,9 @@ public class LogsItem extends AbstractItem<LogsItem, LogsItem.ViewHolder> {
             case LOGLEVEL_F:
                 viewHolder.loglevel.setImageResource(R.drawable.f);
                 break;
+            case LOGLEVEL_DENIALS:
+                viewHolder.loglevel.setImageResource(R.drawable.denial);
+                break;
             case LOGLEVEL_UNDEFINED:
         }
     }
