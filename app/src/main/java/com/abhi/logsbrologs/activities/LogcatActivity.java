@@ -41,7 +41,7 @@ public class LogcatActivity extends AppCompatActivity {
     private static final String TAG = "LogcatActivity";
     private Shell.Interactive rootSession;
     private RecyclerView recyclerView;
-    private FastItemAdapter<LogsItem> fastItemAdapter;
+    public FastItemAdapter<LogsItem> fastItemAdapter;
     private int count = 0;
     private boolean isScrollStateIdle = true;
     private LinearLayoutManager mLayoutManager;
@@ -107,40 +107,6 @@ public class LogcatActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         if (isDebuggable) Log.d(TAG, "onStop");
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.verbose:
-                rootSession("logcat");
-                break;
-            case R.id.debug:
-                rootSession("logcat *:D");
-                break;
-            case R.id.info:
-                rootSession("logcat *:I");
-                break;
-            case R.id.warning:
-                rootSession("logcat *:W");
-                break;
-            case R.id.error:
-                rootSession("logcat *:E");
-                break;
-            case R.id.fatal:
-                rootSession("logcat *:F");
-                break;
-            case R.id.clear:
-                fastItemAdapter.clear();
-                break;
-        }
-        return true;
     }
 
     private void initViews() {
@@ -214,7 +180,7 @@ public class LogcatActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
     }
 
-    private void rootSession(String logType) {
+    public void rootSession(String logType) {
         if (rootSession != null) {
             if (rootSession.isRunning()) {
                 rootSession.kill();
