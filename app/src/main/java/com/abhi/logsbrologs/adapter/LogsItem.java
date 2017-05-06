@@ -27,8 +27,8 @@ public class LogsItem extends AbstractItem<LogsItem, LogsItem.ViewHolder> {
         this.loglevel = loglevel;
     }
 
-    public String setLog() {
-        return log;
+    public void setLog( String Log) {
+        this.log = log;
     }
 
     public String getLog() {

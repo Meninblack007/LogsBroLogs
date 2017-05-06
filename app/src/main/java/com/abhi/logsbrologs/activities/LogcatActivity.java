@@ -13,6 +13,7 @@ import com.abhi.logsbrologs.R;
 import com.abhi.logsbrologs.adapter.LogsItem;
 import com.lapism.searchview.SearchView;
 import com.mikepenz.fastadapter.IItemAdapter;
+import com.mikepenz.fastadapter.adapters.ItemAdapter;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.mikepenz.fastadapter.adapters.ItemAdapter.ItemFilterListener;
 
@@ -140,7 +141,10 @@ public class LogcatActivity extends AppCompatActivity {
         fastItemAdapter.withFilterPredicate(new IItemAdapter.Predicate<LogsItem>() {
             @Override
             public boolean filter(LogsItem item, CharSequence constraint) {
-                return !item.getLog().toLowerCase().contains(constraint.toString().toLowerCase());
+                if (item.getLog() != null) {
+                    return !item.getLog().toLowerCase().contains(constraint.toString().toLowerCase());
+                } else
+                    return true;
             }
         });
        // fastItemAdapter.getItemAdapter().withItemFilterListener(this);
@@ -232,7 +236,7 @@ public class LogcatActivity extends AppCompatActivity {
                 else
                     loglevel = Constants.Loglevel.LOGLEVEL_UNDEFINED;
 
-                fastItemAdapter.add(new LogsItem(log, time, loglevel));
+                ((ItemAdapter.ItemFilter)fastItemAdapter.getItemFilter()).add(new LogsItem(log, time, loglevel));
                 if (isScrollStateIdle) recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
             }
         });
