@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class CheckRoot extends AsyncTask<Void, Void, Void> {
-
         @Override
         protected Void doInBackground(Void... params) {
             isSuAvailable = Shell.SU.available();
@@ -58,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
             }
             try {
                 Thread.sleep(300);
-            } catch (InterruptedException e) {}
-
+            } catch (InterruptedException e) {
+            }
             return null;
         }
 
@@ -73,10 +72,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent logIntent = new Intent(MainActivity.this, LogcatActivity.class);
                 startActivity(logIntent);
                 finish();
-
-
             }
         }
-
     }
 }

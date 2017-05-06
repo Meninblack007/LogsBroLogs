@@ -21,17 +21,15 @@ import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
-import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
-
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import eu.chainfire.libsuperuser.Shell;
 
 /**
@@ -58,7 +56,6 @@ public class LogcatActivity extends AppCompatActivity {
         initViews();
         rootSession("logcat");
         fastItemAdapter.withSavedInstanceState(savedInstanceState);
-
         header = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.color.colorPrimary)
@@ -68,7 +65,6 @@ public class LogcatActivity extends AppCompatActivity {
                 )
                 .withCurrentProfileHiddenInList(true)
                 .build();
-
         drawer = new DrawerBuilder()
                 .withActivity(this)
                 .withTranslucentStatusBar(false)
@@ -82,7 +78,7 @@ public class LogcatActivity extends AppCompatActivity {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
 
-                        if(drawerItem.getIdentifier() == 1) {
+                        if (drawerItem.getIdentifier() == 1) {
                             fastItemAdapter.clear();
                             rootSession("denials");
                         }
@@ -90,8 +86,8 @@ public class LogcatActivity extends AppCompatActivity {
                         return false;
                     }
                 })
-                .build ();
-        }
+                .build();
+    }
 
 
     @Override
@@ -149,22 +145,17 @@ public class LogcatActivity extends AppCompatActivity {
     private void initViews() {
         Log.d(TAG, "initViews");
         rootSession = new Shell.Builder().useSU().open();
-
         fastItemAdapter = new FastItemAdapter<>();
         fastItemAdapter.withSelectable(true);
         fastItemAdapter.withPositionBasedStateManagement(true);
-
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(fastItemAdapter);
         recyclerView.setItemAnimator(null);
-
         final SearchView searchView = (SearchView) findViewById(R.id.searchView);
-
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -182,19 +173,17 @@ public class LogcatActivity extends AppCompatActivity {
                 isScrollStateIdle = pastVisibleItems + visibleItemCount >= totalItemCount;
             }
         });
-
         fastItemAdapter.withFilterPredicate(new IItemAdapter.Predicate<LogsItem>() {
             @Override
             public boolean filter(LogsItem item, CharSequence constraint) {
                 if (item.getLog() != null) {
                     return !item.getLog().toLowerCase().contains(constraint.toString().toLowerCase());
-                } else
+                } else {
                     return true;
+                }
             }
         });
-       // fastItemAdapter.getItemAdapter().withItemFilterListener(this);
-
-
+        // fastItemAdapter.getItemAdapter().withItemFilterListener(this);
         searchView.setHint("Search");
         searchView.setFocusable(false);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -220,12 +209,12 @@ public class LogcatActivity extends AppCompatActivity {
         });
     }
 
-        @Override
-        protected void onSaveInstanceState (Bundle outState){
-            outState = fastItemAdapter.saveInstanceState(outState);
-            outState = drawer.saveInstanceState(outState);
-            super.onSaveInstanceState(outState);
-        }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState = fastItemAdapter.saveInstanceState(outState);
+        outState = drawer.saveInstanceState(outState);
+        super.onSaveInstanceState(outState);
+    }
 
     private void rootSession(String logType) {
         if (rootSession != null) {
@@ -239,7 +228,7 @@ public class LogcatActivity extends AppCompatActivity {
     }
 
     private void logsBro(final String logLevel) {
-     //   Log.d(TAG, "logLevel: " + logLevel);
+        //   Log.d(TAG, "logLevel: " + logLevel);
         fastItemAdapter.clear();
         if (!logLevel.equals("denials")) {
             rootSession.addCommand(new String[]{logLevel}, 0, new Shell.OnCommandLineListener() {
@@ -274,29 +263,28 @@ public class LogcatActivity extends AppCompatActivity {
                     }
 
                     // Log.i("TAG", "TIME$$"+time+"$$"+loglevelStr+"$$"+log+"$$");
-                    Constants.Loglevel loglevel;
+                    Constants.LogLevel loglevel;
                     if ("I".equals(loglevelStr))
-                        loglevel = Constants.Loglevel.LOGLEVEL_I;
+                        loglevel = Constants.LogLevel.LOGLEVEL_I;
                     else if ("V".equals(loglevelStr))
-                        loglevel = Constants.Loglevel.LOGLEVEL_V;
+                        loglevel = Constants.LogLevel.LOGLEVEL_V;
                     else if ("W".equals(loglevelStr))
-                        loglevel = Constants.Loglevel.LOGLEVEL_W;
+                        loglevel = Constants.LogLevel.LOGLEVEL_W;
                     else if ("D".equals(loglevelStr))
-                        loglevel = Constants.Loglevel.LOGLEVEL_D;
+                        loglevel = Constants.LogLevel.LOGLEVEL_D;
                     else if ("E".equals(loglevelStr))
-                        loglevel = Constants.Loglevel.LOGLEVEL_E;
+                        loglevel = Constants.LogLevel.LOGLEVEL_E;
                     else if ("F".equals(loglevelStr))
-                        loglevel = Constants.Loglevel.LOGLEVEL_F;
+                        loglevel = Constants.LogLevel.LOGLEVEL_F;
                     else
-                        loglevel = Constants.Loglevel.LOGLEVEL_UNDEFINED;
+                        loglevel = Constants.LogLevel.LOGLEVEL_UNDEFINED;
 
                     ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(log, time, loglevel));
-                    if (isScrollStateIdle)
-                        recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
+                    if (isScrollStateIdle) recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
                 }
             });
         } else {
-            rootSession.addCommand(new String[]{"dmesg | grep \"avc: denied\""},0, new Shell.OnCommandLineListener() {
+            rootSession.addCommand(new String[]{"dmesg | grep \"avc: denied\""}, 0, new Shell.OnCommandLineListener() {
                 @Override
                 public void onCommandResult(int commandCode, int exitCode) {
                     Log.d(TAG, "onCommandResult: " + commandCode);
@@ -308,15 +296,10 @@ public class LogcatActivity extends AppCompatActivity {
                         count = 0;
                         fastItemAdapter.clear();
                     }
-
                     line.trim();
-
-                    ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(line,null,Constants.Loglevel.LOGLEVEL_DENIALS));
-
-                    if (isScrollStateIdle)
-                        recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
+                    ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(line, null, Constants.LogLevel.LOGLEVEL_DENIALS));
+                    if (isScrollStateIdle) recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
                 }
-
             });
         }
     }

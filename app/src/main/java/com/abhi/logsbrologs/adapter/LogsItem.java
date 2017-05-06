@@ -19,15 +19,15 @@ public class LogsItem extends AbstractItem<LogsItem, LogsItem.ViewHolder> {
 
     public String log;
     private String time;
-    private Constants.Loglevel loglevel;
+    private Constants.LogLevel logLevel;
 
-    public LogsItem(String log, String time, Constants.Loglevel loglevel) {
+    public LogsItem(String log, String time, Constants.LogLevel logLevel) {
         this.log = log;
         this.time = time;
-        this.loglevel = loglevel;
+        this.logLevel = logLevel;
     }
 
-    public void setLog( String Log) {
+    public void setLog(String Log) {
         this.log = log;
     }
 
@@ -53,29 +53,31 @@ public class LogsItem extends AbstractItem<LogsItem, LogsItem.ViewHolder> {
             viewHolder.title.setText(log);
         if (time != null)
             viewHolder.time.setText(time);
-        switch (loglevel) {
+
+        switch (logLevel) {
             case LOGLEVEL_I:
-                viewHolder.loglevel.setImageResource(R.drawable.i);
+                viewHolder.logLevel.setImageResource(R.drawable.i);
                 break;
             case LOGLEVEL_V:
-                viewHolder.loglevel.setImageResource(R.drawable.v);
+                viewHolder.logLevel.setImageResource(R.drawable.v);
                 break;
             case LOGLEVEL_W:
-                viewHolder.loglevel.setImageResource(R.drawable.w);
+                viewHolder.logLevel.setImageResource(R.drawable.w);
                 break;
             case LOGLEVEL_D:
-                viewHolder.loglevel.setImageResource(R.drawable.d);
+                viewHolder.logLevel.setImageResource(R.drawable.d);
                 break;
             case LOGLEVEL_E:
-                viewHolder.loglevel.setImageResource(R.drawable.e);
+                viewHolder.logLevel.setImageResource(R.drawable.e);
                 break;
             case LOGLEVEL_F:
-                viewHolder.loglevel.setImageResource(R.drawable.f);
+                viewHolder.logLevel.setImageResource(R.drawable.f);
                 break;
             case LOGLEVEL_DENIALS:
-                viewHolder.loglevel.setImageResource(R.drawable.denial);
+                viewHolder.logLevel.setImageResource(R.drawable.denial);
                 break;
             case LOGLEVEL_UNDEFINED:
+                break;
         }
     }
 
@@ -87,15 +89,13 @@ public class LogsItem extends AbstractItem<LogsItem, LogsItem.ViewHolder> {
     protected static class ViewHolder extends RecyclerView.ViewHolder {
         protected TextView title;
         TextView time;
-        ImageView loglevel;
+        ImageView logLevel;
 
         public ViewHolder(View view) {
             super(view);
             title = (TextView) view.findViewById(R.id.log);
             time = (TextView) view.findViewById(R.id.time);
-            loglevel = (ImageView) view.findViewById(R.id.loglevel);
-
+            logLevel = (ImageView) view.findViewById(R.id.loglevel);
         }
     }
-
 }
