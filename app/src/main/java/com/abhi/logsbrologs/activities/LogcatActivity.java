@@ -7,21 +7,35 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.abhi.logsbrologs.Constants;
 import com.abhi.logsbrologs.R;
 import com.abhi.logsbrologs.adapter.LogsItem;
+import com.abhi.logsbrologs.utils.Utils;
 import com.lapism.searchview.SearchView;
 import com.mikepenz.fastadapter.IItemAdapter;
+import com.mikepenz.fastadapter.adapters.ItemAdapter;
+import com.mikepenz.fastadapter.commons.BuildConfig;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
-import com.mikepenz.fastadapter.adapters.ItemAdapter.ItemFilterListener;
-
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import eu.chainfire.libsuperuser.Shell;
+
+import static com.abhi.logsbrologs.Constants.KMSG;
+import static com.abhi.logsbrologs.Constants.LAST_KMSG;
+import static com.abhi.logsbrologs.Constants.RAMOOPS;
 
 /**
  * Created by parth on 6/4/17.
@@ -36,42 +50,107 @@ public class LogcatActivity extends AppCompatActivity {
     private int count = 0;
     private boolean isScrollStateIdle = true;
     private LinearLayoutManager mLayoutManager;
+    private Drawer drawer;
+    private boolean isDebuggable = false;
+    private long mDrawerClick;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logcat);
-        Log.d(TAG, "onCreate");
+        if (isDebuggable) Log.d(TAG, "onCreate");
         initViews();
         rootSession("logcat");
         fastItemAdapter.withSavedInstanceState(savedInstanceState);
-
+        AccountHeader header = new AccountHeaderBuilder()
+                .withActivity(this)
+                .withHeaderBackground(R.color.colorPrimary)
+                .withProfileImagesVisible(false)
+                .addProfiles(
+                        new ProfileDrawerItem().withName("LogsBroLogs").withEmail(BuildConfig.VERSION_NAME)
+                )
+                .withCurrentProfileHiddenInList(true)
+                .build();
+        drawer = new DrawerBuilder()
+                .withActivity(this)
+                .withTranslucentStatusBar(false)
+                .withAccountHeader(header)
+                .addDrawerItems(
+                        new PrimaryDrawerItem().withName("Logcat").withIdentifier(0),
+                        new PrimaryDrawerItem().withName("Denials").withIdentifier(1),
+                        new PrimaryDrawerItem().withName("Radio Log").withIdentifier(2)
+                )
+                .withCloseOnClick(true)
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        mDrawerClick = drawerItem.getIdentifier();
+                        if (drawerItem.getIdentifier() == 0) {
+                            fastItemAdapter.clear();
+                            rootSession("logcat");
+                        } else if (drawerItem.getIdentifier() == 1) {
+                            fastItemAdapter.clear();
+                           rootSession("dmesg | grep \"avc: denied\"");
+                        } else if (drawerItem.getIdentifier() == 2) {
+                            fastItemAdapter.clear();
+                            rootSession("logcat -b radio");
+                        }
+                        return false;
+                    }
+                })
+                .build();
     }
+
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause");
+        if (isDebuggable) Log.d(TAG, "onPause");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume");
+        if (isDebuggable) Log.d(TAG, "onResume");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(TAG, "onStop");
+        if (isDebuggable) Log.d(TAG, "onStop");
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu (Menu menu) {
+        menu.clear();
+        switch (Long.toString(mDrawerClick)) {
+            case "0":
+                getMenuInflater().inflate(R.menu.logcat_menu, menu);
+                break;
+            case "1":
+                getMenuInflater().inflate(R.menu.denial_menu, menu);
+
+                if (!(Utils.fileExist(RAMOOPS) || Utils.fileExist(LAST_KMSG)))  {
+                    menu.findItem(R.id.ramoops).setVisible(false);
+                }
+                if (!Utils.fileExist(KMSG)) {
+                    menu.findItem(R.id.kmsg).setVisible(false);
+                }
+                break;
+            case "2":
+                menu.clear();
+                break;
+            default:
+                getMenuInflater().inflate(R.menu.logcat_menu, menu);
+                break;
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -96,29 +175,39 @@ public class LogcatActivity extends AppCompatActivity {
             case R.id.clear:
                 fastItemAdapter.clear();
                 break;
+            case R.id.dmesg:
+                rootSession("dmesg | grep \"avc: denied\"");
+                break;
+            case R.id.kmsg:
+                rootSession("cat " + KMSG + " | grep \"avc: denied\"");
+                break;
+            case R.id.ramoops:
+                if (!Utils.fileExist(RAMOOPS)){
+                    RAMOOPS = LAST_KMSG;
+                }
+                rootSession("cat " + RAMOOPS + " | grep \"avc: denied\"");
+                break;
+            case R.id.logcat:
+                rootSession("logcat | grep \"avc: denied\"");
+                break;
         }
         return true;
     }
 
     private void initViews() {
-        Log.d(TAG, "initViews");
+        if (isDebuggable) Log.d(TAG, "initViews");
         rootSession = new Shell.Builder().useSU().open();
-
         fastItemAdapter = new FastItemAdapter<>();
         fastItemAdapter.withSelectable(true);
         fastItemAdapter.withPositionBasedStateManagement(true);
-
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(fastItemAdapter);
         recyclerView.setItemAnimator(null);
-
         final SearchView searchView = (SearchView) findViewById(R.id.searchView);
-
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -136,16 +225,14 @@ public class LogcatActivity extends AppCompatActivity {
                 isScrollStateIdle = pastVisibleItems + visibleItemCount >= totalItemCount;
             }
         });
-
         fastItemAdapter.withFilterPredicate(new IItemAdapter.Predicate<LogsItem>() {
             @Override
             public boolean filter(LogsItem item, CharSequence constraint) {
-                return !item.getLog().toLowerCase().contains(constraint.toString().toLowerCase());
+                return item.getLog() == null ||
+                        !item.getLog().toLowerCase().contains(constraint.toString().toLowerCase());
             }
         });
-       // fastItemAdapter.getItemAdapter().withItemFilterListener(this);
-
-
+        // fastItemAdapter.getItemAdapter().withItemFilterListener(this);
         searchView.setHint("Search");
         searchView.setFocusable(false);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -163,14 +250,20 @@ public class LogcatActivity extends AppCompatActivity {
 
             }
         });
+        searchView.setOnMenuClickListener(new SearchView.OnMenuClickListener() {
+            @Override
+            public void onMenuClick() {
+                drawer.openDrawer();
+            }
+        });
     }
 
-        @Override
-        protected void onSaveInstanceState (Bundle outState){
-            outState = fastItemAdapter.saveInstanceState(outState);
-            super.onSaveInstanceState(outState);
-        }
-
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState = fastItemAdapter.saveInstanceState(outState);
+        outState = drawer.saveInstanceState(outState);
+        super.onSaveInstanceState(outState);
+    }
 
     private void rootSession(String logType) {
         if (rootSession != null) {
@@ -178,17 +271,17 @@ public class LogcatActivity extends AppCompatActivity {
                 rootSession.kill();
             }
         }
-        fastItemAdapter.clear();
         rootSession = new Shell.Builder().useSU().open();
         logsBro(logType);
     }
 
-    private void logsBro(String logLevel) {
-        Log.d(TAG, "logLevel: " + logLevel);
-        rootSession.addCommand(new String[]{logLevel}, 0, new Shell.OnCommandLineListener() {
+    private void logsBro(final String logType) {
+        if (isDebuggable) Log.d(TAG, "LogType: " + logType);
+           fastItemAdapter.clear();
+        rootSession.addCommand(new String[]{logType}, 0, new Shell.OnCommandLineListener() {
             @Override
             public void onCommandResult(int commandCode, int exitCode) {
-                Log.d(TAG, "onCommandResult: " + commandCode);
+                if (isDebuggable) Log.d(TAG, "onCommandResult: " + commandCode);
             }
 
             @Override
@@ -197,43 +290,45 @@ public class LogcatActivity extends AppCompatActivity {
                     count = 0;
                     fastItemAdapter.clear();
                 }
-                String time = null;
-                String log = null;
-                String loglevelStr = null;
-                line.trim();
-                List<String> templist = new ArrayList<String>();
-                //Log.i("TAG", "LINE" + line);
-                Pattern pattern = Pattern.compile("(\\S+)");
-                Matcher matcher = pattern.matcher(line);
-                while (matcher.find()) {
-                    templist.add(matcher.group());
-                }
-                if (templist.size() > 4) {
-                    time = templist.get(1);
-                    loglevelStr = templist.get(4);
-                    int logIndex = line.indexOf(loglevelStr);
-                    log = line.substring(logIndex > -1 ? logIndex + 2: 0);
-                }
+                if (!logType.contains("denied")) {
+                    String time = null;
+                    String log = null;
+                    String loglevelStr = null;
+                    line.trim();
+                    List<String> templist = new ArrayList<String>();
+                    Pattern pattern = Pattern.compile("(\\S+)");
+                    Matcher matcher = pattern.matcher(line);
+                    while (matcher.find()) {
+                        templist.add(matcher.group());
+                    }
+                    if (templist.size() > 4) {
+                        time = templist.get(1);
+                        loglevelStr = templist.get(4);
+                        int logIndex = line.indexOf(loglevelStr);
+                        log = line.substring(logIndex > -1 ? logIndex + 2 : 0);
+                    }
 
-                // Log.i("TAG", "TIME$$"+time+"$$"+loglevelStr+"$$"+log+"$$");
-                Constants.Loglevel loglevel;
-                if ("I".equals(loglevelStr))
-                    loglevel = Constants.Loglevel.LOGLEVEL_I;
-                else if ("V".equals(loglevelStr))
-                    loglevel = Constants.Loglevel.LOGLEVEL_V;
-                else if ("W".equals(loglevelStr))
-                    loglevel = Constants.Loglevel.LOGLEVEL_W;
-                else if ("D".equals(loglevelStr))
-                    loglevel = Constants.Loglevel.LOGLEVEL_D;
-                else if ("E".equals(loglevelStr))
-                    loglevel = Constants.Loglevel.LOGLEVEL_E;
-                else if ("F".equals(loglevelStr))
-                    loglevel = Constants.Loglevel.LOGLEVEL_F;
-                else
-                    loglevel = Constants.Loglevel.LOGLEVEL_UNDEFINED;
-
-                fastItemAdapter.add(new LogsItem(log, time, loglevel));
-                if (isScrollStateIdle) recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
+                    Constants.LogLevel loglevel;
+                    if ("I".equals(loglevelStr))
+                        loglevel = Constants.LogLevel.LOGLEVEL_I;
+                    else if ("V".equals(loglevelStr))
+                        loglevel = Constants.LogLevel.LOGLEVEL_V;
+                    else if ("W".equals(loglevelStr))
+                        loglevel = Constants.LogLevel.LOGLEVEL_W;
+                    else if ("D".equals(loglevelStr))
+                        loglevel = Constants.LogLevel.LOGLEVEL_D;
+                    else if ("E".equals(loglevelStr))
+                        loglevel = Constants.LogLevel.LOGLEVEL_E;
+                    else if ("F".equals(loglevelStr))
+                        loglevel = Constants.LogLevel.LOGLEVEL_F;
+                    else
+                        loglevel = Constants.LogLevel.LOGLEVEL_UNDEFINED;
+                    ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(log, time, loglevel));
+                } else {
+                    ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(line, null, Constants.LogLevel.LOGLEVEL_DENIALS));
+                }
+                if (isScrollStateIdle)
+                    recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
             }
         });
     }

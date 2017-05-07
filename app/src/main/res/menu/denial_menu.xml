@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/logLevel"
+        android:title="Denial Source">
+        <menu>
+            <item
+                android:id="@+id/dmesg"
+                android:title="Dmesg (Default)" />
+            <item
+                android:id="@+id/logcat"
+                android:title="Logcat" />
+            <item
+                android:id="@+id/kmsg"
+                android:title="Kmsg" />
+            <item
+                android:id="@+id/ramoops"
+                android:title="Ramoops" />
+        </menu>
+    </item>
+</menu>

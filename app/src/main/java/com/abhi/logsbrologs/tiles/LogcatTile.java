@@ -11,9 +11,14 @@ import android.os.Environment;
 import android.service.quicksettings.TileService;
 import android.widget.Toast;
 
+import com.abhi.logsbrologs.utils.Utils;
+
 import java.io.File;
 
 import eu.chainfire.libsuperuser.Shell;
+
+import static com.abhi.logsbrologs.Constants.LAST_KMSG;
+import static com.abhi.logsbrologs.Constants.RAMOOPS;
 
 @TargetApi(Build.VERSION_CODES.N)
 
@@ -27,9 +32,6 @@ public class LogcatTile extends TileService {
     public static final String RAM_FILE = new File(Environment.getExternalStorageDirectory(), "KernelLog.txt").getAbsolutePath();
     public static final String DMESG_FILE = new File(Environment.getExternalStorageDirectory().getAbsolutePath()) + "/Dmesg.txt";
 
-    public static final String RAMOOPS = "/sys/fs/pstore/console-ramoops";
-    public static final String LAST_KMSG = "/proc/last_kmsg";
-
     @Override
     public void onStartListening() {
         super.onStartListening();
@@ -37,7 +39,7 @@ public class LogcatTile extends TileService {
 
     public Dialog logDialog() {
         CharSequence options[] = new CharSequence[]{
-                "Logcat", hasRamoops() ? "Ramoops" : "Last_kmsg", "Dmesg"};
+                "Logcat", Utils.fileExist(RAMOOPS) ? "Ramoops" : "Last_kmsg", "Dmesg"};
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle("Options");
         alertDialog.setItems(options, new DialogInterface.OnClickListener() {
@@ -47,20 +49,19 @@ public class LogcatTile extends TileService {
                     switch (which) {
                         case 0:
                             Shell.SU.run("logcat -d >" + LOG_FILE);
-                            shareIT(LOG_FILE, "Share Logs File");
+                            shareIt(LOG_FILE, "Share logcat");
                             break;
                         case 1:
-                            if (hasRamoops()) {
+                            if (Utils.fileExist(RAMOOPS)) {
                                 Shell.SU.run("cat " + RAMOOPS + " > " + RAM_FILE);
-                                shareIT(RAM_FILE, "Share kernel logs");
                             } else {
                                 Shell.SU.run("cat " + LAST_KMSG + " > " + RAM_FILE);
-                                shareIT(RAM_FILE, "Share kernel logs");
                             }
+                            shareIt(RAM_FILE, "Share kernel logs");
                             break;
                         case 2:
                             Shell.SU.run("dmesg >" + DMESG_FILE);
-                            shareIT(DMESG_FILE, "Share dmesg");
+                            shareIt(DMESG_FILE, "Share dmesg");
                             break;
                     }
                 } else {
@@ -78,12 +79,7 @@ public class LogcatTile extends TileService {
         showDialog(logDialog());
     }
 
-    public boolean hasRamoops() {
-        String s = Shell.SU.run("[ -f \"" + RAMOOPS + "\" ] && echo true || echo false").get(0);
-        return Boolean.parseBoolean(s);
-    }
-
-    public void shareIT(String e, String f) {
+    public void shareIt(String e, String f) {
         Intent shareIntent = new Intent();
         shareIntent.setAction(Intent.ACTION_SEND);
         shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///" + e));
