@@ -48,7 +48,6 @@ public class LogcatActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private FastItemAdapter<LogsItem> fastItemAdapter;
     private int count = 0;
-    private boolean isScrollStateIdle = true;
     private LinearLayoutManager mLayoutManager;
     private Drawer drawer;
     private boolean isDebuggable = false;
@@ -210,24 +209,7 @@ public class LogcatActivity extends AppCompatActivity {
         recyclerView.setItemAnimator(null);
         templist = new ArrayList<String>();
         final SearchView searchView = (SearchView) findViewById(R.id.searchView);
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    isScrollStateIdle = false;
-                }
-            }
 
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                int visibleItemCount = mLayoutManager.getChildCount();
-                int totalItemCount = mLayoutManager.getItemCount();
-                int pastVisibleItems = mLayoutManager.findFirstVisibleItemPosition();
-                isScrollStateIdle = pastVisibleItems + visibleItemCount >= totalItemCount;
-            }
-        });
         fastItemAdapter.withFilterPredicate(new IItemAdapter.Predicate<LogsItem>() {
             @Override
             public boolean filter(LogsItem item, CharSequence constraint) {
@@ -289,7 +271,7 @@ public class LogcatActivity extends AppCompatActivity {
 
             @Override
             public void onLine(String line) {
-                if (fastItemAdapter.size() > 3000) {
+                if (fastItemAdapter.getItemCount() > 3000) {
                     fastItemAdapter.remove(0);
                 }
                 if (!logType.contains("denied")) {
@@ -329,7 +311,7 @@ public class LogcatActivity extends AppCompatActivity {
                 } else {
                     ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(line, null, Constants.LogLevel.LOGLEVEL_DENIALS));
                 }
-                if (isScrollStateIdle)
+                if (mLayoutManager.findLastVisibleItemPosition() == fastItemAdapter.getItemCount() - 1)
                     recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
             }
         });
