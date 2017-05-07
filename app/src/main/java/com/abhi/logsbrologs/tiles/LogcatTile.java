@@ -11,6 +11,8 @@ import android.os.Environment;
 import android.service.quicksettings.TileService;
 import android.widget.Toast;
 
+import com.abhi.logsbrologs.utils.Utils;
+
 import java.io.File;
 
 import eu.chainfire.libsuperuser.Shell;
@@ -37,7 +39,7 @@ public class LogcatTile extends TileService {
 
     public Dialog logDialog() {
         CharSequence options[] = new CharSequence[]{
-                "Logcat", hasRamoops() ? "Ramoops" : "Last_kmsg", "Dmesg"};
+                "Logcat", Utils.fileExist(RAMOOPS) ? "Ramoops" : "Last_kmsg", "Dmesg"};
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle("Options");
         alertDialog.setItems(options, new DialogInterface.OnClickListener() {
@@ -50,7 +52,7 @@ public class LogcatTile extends TileService {
                             shareIt(LOG_FILE, "Share logcat");
                             break;
                         case 1:
-                            if (hasRamoops()) {
+                            if (Utils.fileExist(RAMOOPS)) {
                                 Shell.SU.run("cat " + RAMOOPS + " > " + RAM_FILE);
                             } else {
                                 Shell.SU.run("cat " + LAST_KMSG + " > " + RAM_FILE);
@@ -75,11 +77,6 @@ public class LogcatTile extends TileService {
     public void onClick() {
         super.onClick();
         showDialog(logDialog());
-    }
-
-    public boolean hasRamoops() {
-        String s = Shell.SU.run("[ -f \"" + RAMOOPS + "\" ] && echo true || echo false").get(0);
-        return Boolean.parseBoolean(s);
     }
 
     public void shareIt(String e, String f) {

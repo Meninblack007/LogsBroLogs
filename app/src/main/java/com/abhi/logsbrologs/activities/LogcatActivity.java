@@ -12,6 +12,7 @@ import android.view.View;
 import com.abhi.logsbrologs.Constants;
 import com.abhi.logsbrologs.R;
 import com.abhi.logsbrologs.adapter.LogsItem;
+import com.abhi.logsbrologs.utils.Utils;
 import com.lapism.searchview.SearchView;
 import com.mikepenz.fastadapter.IItemAdapter;
 import com.mikepenz.fastadapter.adapters.ItemAdapter;
@@ -47,6 +48,10 @@ public class LogcatActivity extends AppCompatActivity {
     private LinearLayoutManager mLayoutManager;
     private Drawer drawer;
     private boolean isDebuggable = false;
+    private long mDrawerClick;
+    private String RAMOOPS = "/sys/fs/pstore/console-ramoops";
+    private String KMSG = "/proc/kmsg";
+    private String LAST_KMSG = "/proc/last_kmsg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,18 +76,23 @@ public class LogcatActivity extends AppCompatActivity {
                 .withAccountHeader(header)
                 .addDrawerItems(
                         new PrimaryDrawerItem().withName("Logcat").withIdentifier(0),
-                        new PrimaryDrawerItem().withName("Denials").withIdentifier(1)
+                        new PrimaryDrawerItem().withName("Denials").withIdentifier(1),
+                        new PrimaryDrawerItem().withName("Radio Log").withIdentifier(2)
                 )
                 .withCloseOnClick(true)
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        mDrawerClick = drawerItem.getIdentifier();
                         if (drawerItem.getIdentifier() == 0) {
                             fastItemAdapter.clear();
                             rootSession("logcat");
                         } else if (drawerItem.getIdentifier() == 1) {
                             fastItemAdapter.clear();
-                            rootSession("dmesg | grep \"avc: denied\"");
+                           rootSession("dmesg | grep \"avc: denied\"");
+                        } else if (drawerItem.getIdentifier() == 2) {
+                            fastItemAdapter.clear();
+                            rootSession("logcat -b radio");
                         }
                         return false;
                     }
@@ -111,10 +121,35 @@ public class LogcatActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu (Menu menu) {
+        menu.clear();
+        switch (Long.toString(mDrawerClick)) {
+            case "0":
+                getMenuInflater().inflate(R.menu.logcat_menu, menu);
+                break;
+            case "1":
+                getMenuInflater().inflate(R.menu.denial_menu, menu);
+
+                if (!(Utils.fileExist(RAMOOPS) || Utils.fileExist(LAST_KMSG)))  {
+                    menu.findItem(R.id.ramoops).setVisible(false);
+                }
+                if (!Utils.fileExist(KMSG)) {
+                    menu.findItem(R.id.kmsg).setVisible(false);
+                }
+                break;
+            case "2":
+                menu.clear();
+                break;
+            default:
+                getMenuInflater().inflate(R.menu.logcat_menu, menu);
+                break;
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -138,6 +173,21 @@ public class LogcatActivity extends AppCompatActivity {
                 break;
             case R.id.clear:
                 fastItemAdapter.clear();
+                break;
+            case R.id.dmesg:
+                rootSession("dmesg | grep \"avc: denied\"");
+                break;
+            case R.id.kmsg:
+                rootSession("cat " + KMSG + " | grep \"avc: denied\"");
+                break;
+            case R.id.ramoops:
+                if (!Utils.fileExist(RAMOOPS)){
+                    RAMOOPS = LAST_KMSG;
+                }
+                rootSession("cat " + RAMOOPS + " | grep \"avc: denied\"");
+                break;
+            case R.id.logcat:
+                rootSession("logcat | grep \"avc: denied\"");
                 break;
         }
         return true;
@@ -226,7 +276,7 @@ public class LogcatActivity extends AppCompatActivity {
 
     private void logsBro(final String logType) {
         if (isDebuggable) Log.d(TAG, "LogType: " + logType);
-           // fastItemAdapter.clear();
+           fastItemAdapter.clear();
         rootSession.addCommand(new String[]{logType}, 0, new Shell.OnCommandLineListener() {
             @Override
             public void onCommandResult(int commandCode, int exitCode) {
