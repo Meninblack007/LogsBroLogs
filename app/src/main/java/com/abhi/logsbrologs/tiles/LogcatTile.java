@@ -17,6 +17,9 @@ import java.io.File;
 
 import eu.chainfire.libsuperuser.Shell;
 
+import static com.abhi.logsbrologs.Constants.LAST_KMSG;
+import static com.abhi.logsbrologs.Constants.RAMOOPS;
+
 @TargetApi(Build.VERSION_CODES.N)
 
 /**
@@ -28,9 +31,6 @@ public class LogcatTile extends TileService {
     public static final String LOG_FILE = new File(Environment.getExternalStorageDirectory(), "Logsbrologs.txt").getAbsolutePath();
     public static final String RAM_FILE = new File(Environment.getExternalStorageDirectory(), "KernelLog.txt").getAbsolutePath();
     public static final String DMESG_FILE = new File(Environment.getExternalStorageDirectory().getAbsolutePath()) + "/Dmesg.txt";
-
-    public static final String RAMOOPS = "/sys/fs/pstore/console-ramoops";
-    public static final String LAST_KMSG = "/proc/last_kmsg";
 
     @Override
     public void onStartListening() {

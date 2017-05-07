@@ -33,6 +33,10 @@ import java.util.regex.Pattern;
 
 import eu.chainfire.libsuperuser.Shell;
 
+import static com.abhi.logsbrologs.Constants.KMSG;
+import static com.abhi.logsbrologs.Constants.LAST_KMSG;
+import static com.abhi.logsbrologs.Constants.RAMOOPS;
+
 /**
  * Created by parth on 6/4/17.
  */
@@ -49,9 +53,6 @@ public class LogcatActivity extends AppCompatActivity {
     private Drawer drawer;
     private boolean isDebuggable = false;
     private long mDrawerClick;
-    private String RAMOOPS = "/sys/fs/pstore/console-ramoops";
-    private String KMSG = "/proc/kmsg";
-    private String LAST_KMSG = "/proc/last_kmsg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
