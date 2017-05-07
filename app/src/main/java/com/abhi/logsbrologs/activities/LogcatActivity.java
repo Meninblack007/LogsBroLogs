@@ -272,7 +272,7 @@ public class LogcatActivity extends AppCompatActivity {
             @Override
             public void onLine(String line) {
                 if (fastItemAdapter.getItemCount() > 3000) {
-                    for(int i=0; i=3000; i++) {
+                    for(int i=0; i<3000; i++) {
                     fastItemAdapter.remove(i);
                        } 
                 }
