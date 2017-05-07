@@ -53,7 +53,8 @@ public class LogcatActivity extends AppCompatActivity {
     private Drawer drawer;
     private boolean isDebuggable = false;
     private long mDrawerClick;
-
+    private Pattern pattern;
+    private List<String> templist;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -196,6 +197,7 @@ public class LogcatActivity extends AppCompatActivity {
 
     private void initViews() {
         if (isDebuggable) Log.d(TAG, "initViews");
+        pattern = Pattern.compile("(\\S+)");
         rootSession = new Shell.Builder().useSU().open();
         fastItemAdapter = new FastItemAdapter<>();
         fastItemAdapter.withSelectable(true);
@@ -206,6 +208,7 @@ public class LogcatActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(fastItemAdapter);
         recyclerView.setItemAnimator(null);
+        templist = new ArrayList<String>();
         final SearchView searchView = (SearchView) findViewById(R.id.searchView);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -286,19 +289,17 @@ public class LogcatActivity extends AppCompatActivity {
 
             @Override
             public void onLine(String line) {
-                if (count++ > 10000) {
-                    count = 0;
-                    fastItemAdapter.clear();
+                if (fastItemAdapter.size() > 3000) {
+                    fastItemAdapter.remove(0);
                 }
                 if (!logType.contains("denied")) {
+                    int count = 0;
                     String time = null;
                     String log = null;
                     String loglevelStr = null;
-                    line.trim();
-                    List<String> templist = new ArrayList<String>();
-                    Pattern pattern = Pattern.compile("(\\S+)");
+
                     Matcher matcher = pattern.matcher(line);
-                    while (matcher.find()) {
+                    while (matcher.find() && count++ <= 5) {
                         templist.add(matcher.group());
                     }
                     if (templist.size() > 4) {
@@ -306,6 +307,7 @@ public class LogcatActivity extends AppCompatActivity {
                         loglevelStr = templist.get(4);
                         int logIndex = line.indexOf(loglevelStr);
                         log = line.substring(logIndex > -1 ? logIndex + 2 : 0);
+                        templist.clear();
                     }
 
                     Constants.LogLevel loglevel;
