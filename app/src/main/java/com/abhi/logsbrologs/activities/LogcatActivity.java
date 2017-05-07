@@ -272,7 +272,9 @@ public class LogcatActivity extends AppCompatActivity {
             @Override
             public void onLine(String line) {
                 if (fastItemAdapter.getItemCount() > 3000) {
-                    fastItemAdapter.remove(0);
+                    for(int i=0; i=3000; i++) {
+                    fastItemAdapter.remove(i);
+                       } 
                 }
                 if (!logType.contains("denied")) {
                     int count = 0;
