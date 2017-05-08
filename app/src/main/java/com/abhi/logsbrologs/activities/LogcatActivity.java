@@ -155,22 +155,22 @@ public class LogcatActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.verbose:
-                rootSession("logcat");
+                Log.i(TAG, "onOptionsItemSelected: " + Constants.LogLevel.LOGLEVEL_V.name());
                 break;
             case R.id.debug:
-                rootSession("logcat *:D");
+                fastItemAdapter.filter("loglevel:" + Constants.LogLevel.LOGLEVEL_D.name());
                 break;
             case R.id.info:
-                rootSession("logcat *:I");
+                fastItemAdapter.filter("loglevel:" + Constants.LogLevel.LOGLEVEL_I.name());
                 break;
             case R.id.warning:
-                rootSession("logcat *:W");
+                fastItemAdapter.filter("loglevel:" + Constants.LogLevel.LOGLEVEL_W.name());
                 break;
             case R.id.error:
-                rootSession("logcat *:E");
+                fastItemAdapter.filter("loglevel:" + Constants.LogLevel.LOGLEVEL_E.name());
                 break;
             case R.id.fatal:
-                rootSession("logcat *:F");
+                fastItemAdapter.filter("loglevel:" + Constants.LogLevel.LOGLEVEL_F.name());
                 break;
             case R.id.clear:
                 fastItemAdapter.clear();
@@ -230,6 +230,14 @@ public class LogcatActivity extends AppCompatActivity {
         fastItemAdapter.withFilterPredicate(new IItemAdapter.Predicate<LogsItem>() {
             @Override
             public boolean filter(LogsItem item, CharSequence constraint) {
+                String constraintString = null;
+                if (constraint != null)
+                    constraintString = constraint.toString();
+                if (constraintString != null && constraintString.contains("loglevel:")) {
+                    String level = constraintString.substring(constraintString.indexOf(":") + 1);
+                    return !level.equals(item.getLogLevel().name());
+                }
+
                 return item.getLog() == null ||
                         !item.getLog().toLowerCase().contains(constraint.toString().toLowerCase());
             }
@@ -328,7 +336,6 @@ public class LogcatActivity extends AppCompatActivity {
                         loglevel = Constants.LogLevel.LOGLEVEL_F;
                     else
                         loglevel = Constants.LogLevel.LOGLEVEL_UNDEFINED;
-
 
                         ((ItemAdapterC.ItemFilter) fastItemAdapter.getItemFilter()).add
                                 (new LogsItem(log, time, loglevel));

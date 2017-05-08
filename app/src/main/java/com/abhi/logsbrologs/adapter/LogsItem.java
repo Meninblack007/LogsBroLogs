@@ -31,6 +31,10 @@ public class LogsItem extends AbstractItem<LogsItem, LogsItem.ViewHolder> {
         return log;
     }
 
+    public Constants.LogLevel getLogLevel() {
+        return logLevel;
+    }
+
     @Override
     public int getType() {
         return R.id.log;
