@@ -47,7 +47,6 @@ public class LogcatActivity extends AppCompatActivity {
     private Shell.Interactive rootSession;
     private RecyclerView recyclerView;
     private FastItemAdapter<LogsItem> fastItemAdapter;
-    private int count = 0;
     private boolean isScrollStateIdle = true;
     private LinearLayoutManager mLayoutManager;
     private Drawer drawer;
@@ -55,6 +54,7 @@ public class LogcatActivity extends AppCompatActivity {
     private long mDrawerClick;
     private Pattern pattern;
     private List<String> templist;
+    private String searchQuery = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -208,7 +208,7 @@ public class LogcatActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(fastItemAdapter);
         recyclerView.setItemAnimator(null);
-        templist = new ArrayList<String>();
+        templist = new ArrayList<>();
         final SearchView searchView = (SearchView) findViewById(R.id.searchView);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -235,7 +235,6 @@ public class LogcatActivity extends AppCompatActivity {
                         !item.getLog().toLowerCase().contains(constraint.toString().toLowerCase());
             }
         });
-        // fastItemAdapter.getItemAdapter().withItemFilterListener(this);
         searchView.setHint("Search");
         searchView.setFocusable(false);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -243,13 +242,15 @@ public class LogcatActivity extends AppCompatActivity {
             public boolean onQueryTextSubmit(String query) {
                 searchView.close(true);
                 fastItemAdapter.filter(query);
+                searchQuery = query;
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 fastItemAdapter.filter(newText);
-                return true;
+                searchQuery = newText;
+                return false;
 
             }
         });
@@ -281,6 +282,7 @@ public class LogcatActivity extends AppCompatActivity {
     private void logsBro(final String logType) {
         if (isDebuggable) Log.d(TAG, "LogType: " + logType);
            fastItemAdapter.clear();
+
         rootSession.addCommand(new String[]{logType}, 0, new Shell.OnCommandLineListener() {
             @Override
             public void onCommandResult(int commandCode, int exitCode) {
@@ -289,7 +291,7 @@ public class LogcatActivity extends AppCompatActivity {
 
             @Override
             public void onLine(String line) {
-                if (fastItemAdapter.size() > 3000) {
+                if (fastItemAdapter.getItemCount() > 10000) {
                     fastItemAdapter.remove(0);
                 }
                 if (!logType.contains("denied")) {
@@ -325,9 +327,16 @@ public class LogcatActivity extends AppCompatActivity {
                         loglevel = Constants.LogLevel.LOGLEVEL_F;
                     else
                         loglevel = Constants.LogLevel.LOGLEVEL_UNDEFINED;
-                    ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(log, time, loglevel));
+
+                    fastItemAdapter.add(new LogsItem(log, time, loglevel));
+
+                    if (searchQuery != null && ! "".equals(searchQuery))
+                        fastItemAdapter.filter(searchQuery);
                 } else {
-                    ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(line, null, Constants.LogLevel.LOGLEVEL_DENIALS));
+                    if (searchQuery != null && ! "".equals(searchQuery))
+                        fastItemAdapter.filter(searchQuery);
+                    
+                    fastItemAdapter.add(new LogsItem(line, null, Constants.LogLevel.LOGLEVEL_DENIALS));
                 }
                 if (isScrollStateIdle)
                     recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
