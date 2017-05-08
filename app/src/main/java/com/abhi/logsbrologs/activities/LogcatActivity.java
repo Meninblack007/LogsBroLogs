@@ -15,9 +15,9 @@ import com.abhi.logsbrologs.adapter.LogsItem;
 import com.abhi.logsbrologs.utils.Utils;
 import com.lapism.searchview.SearchView;
 import com.mikepenz.fastadapter.IItemAdapter;
-import com.mikepenz.fastadapter.adapters.ItemAdapter;
+import com.abhi.logsbrologs.adapter.ItemAdapterC;
 import com.mikepenz.fastadapter.commons.BuildConfig;
-import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
+import com.abhi.logsbrologs.adapter.FastItemAdapterC;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -46,7 +46,7 @@ public class LogcatActivity extends AppCompatActivity {
     private static final String TAG = "LogcatActivity";
     private Shell.Interactive rootSession;
     private RecyclerView recyclerView;
-    private FastItemAdapter<LogsItem> fastItemAdapter;
+    private FastItemAdapterC<LogsItem> fastItemAdapter;
     private boolean isScrollStateIdle = true;
     private LinearLayoutManager mLayoutManager;
     private Drawer drawer;
@@ -54,7 +54,6 @@ public class LogcatActivity extends AppCompatActivity {
     private long mDrawerClick;
     private Pattern pattern;
     private List<String> templist;
-    private boolean isFiltering;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -199,7 +198,7 @@ public class LogcatActivity extends AppCompatActivity {
         if (isDebuggable) Log.d(TAG, "initViews");
         pattern = Pattern.compile("(\\S+)");
         rootSession = new Shell.Builder().useSU().open();
-        fastItemAdapter = new FastItemAdapter<>();
+        fastItemAdapter = new FastItemAdapterC<>();
         fastItemAdapter.withSelectable(true);
         fastItemAdapter.withPositionBasedStateManagement(true);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
@@ -242,14 +241,12 @@ public class LogcatActivity extends AppCompatActivity {
             public boolean onQueryTextSubmit(String query) {
                 searchView.close(true);
                 fastItemAdapter.filter(query);
-                isFiltering = !(query == null || "".equals(query));
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 fastItemAdapter.filter(newText);
-                isFiltering = !(newText == null || "".equals(newText));
                 return false;
 
             }
@@ -291,7 +288,7 @@ public class LogcatActivity extends AppCompatActivity {
 
             @Override
             public void onLine(String line) {
-                if (fastItemAdapter.getItemCount() > 10000) {
+                if (fastItemAdapter.getItemCount() > 1000) {
                     fastItemAdapter.remove(0);
                 }
                 if (!logType.contains("denied")) {
@@ -333,18 +330,12 @@ public class LogcatActivity extends AppCompatActivity {
                         loglevel = Constants.LogLevel.LOGLEVEL_UNDEFINED;
 
 
-
-                    if (isFiltering)
-                        ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(log, time, loglevel));
-                    else
-                        fastItemAdapter.add(new LogsItem(log, time, loglevel));
+                        ((ItemAdapterC.ItemFilter) fastItemAdapter.getItemFilter()).add
+                                (new LogsItem(log, time, loglevel));
 
                 } else {
-                    if (isFiltering)
-                        ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(
-                                new LogsItem(line, null, Constants.LogLevel.LOGLEVEL_DENIALS));
-                    else
-                        fastItemAdapter.add(new LogsItem(line, null, Constants.LogLevel.LOGLEVEL_DENIALS));
+                    ((ItemAdapterC.ItemFilter) fastItemAdapter.getItemFilter()).add(
+                            new LogsItem(line, null, Constants.LogLevel.LOGLEVEL_DENIALS));
                 }
 
                 if (isScrollStateIdle)
