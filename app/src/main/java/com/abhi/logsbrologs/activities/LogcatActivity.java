@@ -287,7 +287,23 @@ public class LogcatActivity extends AppCompatActivity {
     private void logsBro(final String logType) {
         if (isDebuggable) Log.d(TAG, "LogType: " + logType);
            fastItemAdapter.clear();
+        int totalLines = 0;
 
+        rootSession.addCommand("logcat -d", 0, new Shell.OnCommandLineListener() {
+            @Override
+            public void onCommandResult(int commandCode, int exitCode) {
+                startLogging(logType, totalLines);
+            }
+
+            @Override
+            public void onLine(String line) {
+                totalLines++;
+            }
+        }
+    }
+
+    private void startLogging(String logType, int totalLines) {
+        int currentLine = 0;
         rootSession.addCommand(new String[]{logType}, 0, new Shell.OnCommandLineListener() {
             @Override
             public void onCommandResult(int commandCode, int exitCode) {
@@ -296,6 +312,9 @@ public class LogcatActivity extends AppCompatActivity {
 
             @Override
             public void onLine(String line) {
+                currentLine++;
+                if (totalLines - currentLine > 1000)
+                    return;
                 if (fastItemAdapter.getItemCount() > 1000) {
                     fastItemAdapter.remove(0);
                 }
