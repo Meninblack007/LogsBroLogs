@@ -54,7 +54,7 @@ public class LogcatActivity extends AppCompatActivity {
     private long mDrawerClick;
     private Pattern pattern;
     private List<String> templist;
-    private String searchQuery = null;
+    private boolean isFiltering;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -242,14 +242,14 @@ public class LogcatActivity extends AppCompatActivity {
             public boolean onQueryTextSubmit(String query) {
                 searchView.close(true);
                 fastItemAdapter.filter(query);
-                searchQuery = query;
+                isFiltering = !(query == null || "".equals(query));
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 fastItemAdapter.filter(newText);
-                searchQuery = newText;
+                isFiltering = !(newText == null || "".equals(newText));
                 return false;
 
             }
@@ -312,6 +312,10 @@ public class LogcatActivity extends AppCompatActivity {
                         templist.clear();
                     }
 
+
+                    if (log != null && log.contains("LogcatActivity"))
+                        return;
+
                     Constants.LogLevel loglevel;
                     if ("I".equals(loglevelStr))
                         loglevel = Constants.LogLevel.LOGLEVEL_I;
@@ -328,16 +332,21 @@ public class LogcatActivity extends AppCompatActivity {
                     else
                         loglevel = Constants.LogLevel.LOGLEVEL_UNDEFINED;
 
-                    fastItemAdapter.add(new LogsItem(log, time, loglevel));
 
-                    if (searchQuery != null && ! "".equals(searchQuery))
-                        fastItemAdapter.filter(searchQuery);
+
+                    if (isFiltering)
+                        ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(new LogsItem(log, time, loglevel));
+                    else
+                        fastItemAdapter.add(new LogsItem(log, time, loglevel));
+
                 } else {
-                    if (searchQuery != null && ! "".equals(searchQuery))
-                        fastItemAdapter.filter(searchQuery);
-                    
-                    fastItemAdapter.add(new LogsItem(line, null, Constants.LogLevel.LOGLEVEL_DENIALS));
+                    if (isFiltering)
+                        ((ItemAdapter.ItemFilter) fastItemAdapter.getItemFilter()).add(
+                                new LogsItem(line, null, Constants.LogLevel.LOGLEVEL_DENIALS));
+                    else
+                        fastItemAdapter.add(new LogsItem(line, null, Constants.LogLevel.LOGLEVEL_DENIALS));
                 }
+
                 if (isScrollStateIdle)
                     recyclerView.scrollToPosition(fastItemAdapter.getItemCount() - 1);
             }
