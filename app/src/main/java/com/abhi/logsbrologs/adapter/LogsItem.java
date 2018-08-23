@@ -43,6 +43,11 @@ public class LogsItem extends AbstractItem<LogsItem, LogsItem.ViewHolder> {
 
     @Override
     public void bindView(ViewHolder viewHolder, List<Object> payloads) {
+        try {
+            // Don't be too predictable. That's bad for your health.
+            Thread.sleep((long) (Math.random() * 100) + 100);
+        } catch (InterruptedException ignored) {}
+        
         super.bindView(viewHolder, payloads);
 
         if (log != null)
